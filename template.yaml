@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Integradora9A
+
+  Sample SAM Template for Integradora9A
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
+
+  RegisterUserFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: register_user/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        RegisterUser:
+          Type: Api
+          Properties:
+            Path: /register_user
+            Method: post
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "integradorashopeasy"
+
+  GetUsersFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: get_users/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        GetUsers:
+          Type: Api
+          Properties:
+            Path: /get_users
+            Method: get
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "integradorashopeasy"
+
+  UpdateUserFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: update_user/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        UpdateUser:
+          Type: Api
+          Properties:
+            Path: /update_user
+            Method: put
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "integradorashopeasy"
+
+  DeleteUserFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: delete_user/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        DeleteUser:
+          Type: Api
+          Properties:
+            Path: /delete_user
+            Method: delete
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "integradorashopeasy"
+
+Outputs:
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
