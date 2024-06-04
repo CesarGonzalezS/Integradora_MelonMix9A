@@ -41,10 +41,10 @@ Resources:
             Method: post
       Environment:
         Variables:
-          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradorashopeasy"
+          RDS_DB: "integradoramelomix"
 
   GetUsersFunction:
     Type: 'AWS::Serverless::Function'
@@ -62,10 +62,10 @@ Resources:
             Method: get
       Environment:
         Variables:
-          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradorashopeasy"
+          RDS_DB: "integradoramelomix"
 
   UpdateUserFunction:
     Type: 'AWS::Serverless::Function'
@@ -83,10 +83,10 @@ Resources:
             Method: put
       Environment:
         Variables:
-          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradorashopeasy"
+          RDS_DB: "integradoramelomix"
 
   DeleteUserFunction:
     Type: 'AWS::Serverless::Function'
@@ -104,10 +104,10 @@ Resources:
             Method: delete
       Environment:
         Variables:
-          RDS_HOST: "integradoramelomix.cluster-c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradorashopeasy"
+          RDS_DB: "integradoramelomix"
 
 Outputs:
   HelloWorldApi:
