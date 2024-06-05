@@ -1,6 +1,7 @@
 import json
 import mysql.connector
 import os
+from datetime import datetime
 
 def lambda_handler(event, context):
     # Obtener variables de entorno
@@ -9,17 +10,19 @@ def lambda_handler(event, context):
     db_password = os.environ['RDS_PASSWORD']
     db_name = os.environ['RDS_DB']
 
-    # Obtener datos del usuario desde la solicitud
-    user_data = json.loads(event['body'])
-    user_id = user_data.get('user_id')
-    username = user_data.get('username')
-    email = user_data.get('email')
-    password = user_data.get('password')
-
-    if not user_id or not username or not email or not password:
+    # Obtener datos del usuario del evento
+    try:
+        body = json.loads(event['body'])
+        username = body['username']
+        email = body['email']
+        password = body['password']
+    except (KeyError, json.JSONDecodeError) as e:
         return {
             "statusCode": 400,
-            "body": json.dumps({"message": "Missing required user data"})
+            "body": json.dumps({
+                "message": "Invalid input",
+                "error": str(e)
+            })
         }
 
     # Conectar a la base de datos RDS
@@ -32,21 +35,26 @@ def lambda_handler(event, context):
         )
         cursor = conn.cursor()
 
-        # Actualizar el usuario en la base de datos
-        sql = "UPDATE users SET username = %s, email = %s, password = %s WHERE user_id = %s"
-        val = (username, email, password, user_id)
-        cursor.execute(sql, val)
+        # Insertar un nuevo usuario
+        date_joined = datetime.now().strftime('%Y-%m-%d')
+        insert_query = """
+            INSERT INTO users (username, email, password, date_joined)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (username, email, password, date_joined))
         conn.commit()
 
         response = {
-            "statusCode": 200,
-            "body": json.dumps({"message": "User updated successfully"})
+            "statusCode": 201,
+            "body": json.dumps({
+                "message": "User created successfully"
+            })
         }
     except mysql.connector.Error as err:
         response = {
             "statusCode": 500,
             "body": json.dumps({
-                "message": "Error updating user",
+                "message": "Error connecting to the database",
                 "error": str(err)
             })
         }

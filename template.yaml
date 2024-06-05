@@ -7,37 +7,24 @@ Description: >
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 5
+    MemorySize: 128
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: hello_world/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Architectures:
-        - x86_64
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
 
-  RegisterUserFunction:
+  CreateUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: register_user/
+      CodeUri: user_management/create_user/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.11
       Architectures:
         - x86_64
       Events:
         RegisterUser:
           Type: Api
           Properties:
-            Path: /register_user
+            Path: /create_user
             Method: post
       Environment:
         Variables:
@@ -46,19 +33,19 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "integradoramelomix"
 
-  GetUsersFunction:
+  ReadUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: get_users/
+      CodeUri: user_management/read_user/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.11
       Architectures:
         - x86_64
       Events:
         GetUsers:
           Type: Api
           Properties:
-            Path: /get_users
+            Path: /read_user
             Method: get
       Environment:
         Variables:
@@ -70,9 +57,9 @@ Resources:
   UpdateUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: update_user/
-      Handler: app.lambda_handler
-      Runtime: python3.9
+      CodeUri: user_management/update_user/
+      Handler: handler.lambda_handler
+      Runtime: python3.11
       Architectures:
         - x86_64
       Events:
@@ -91,9 +78,9 @@ Resources:
   DeleteUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: delete_user/
-      Handler: app.lambda_handler
-      Runtime: python3.9
+      CodeUri: user_management/delete_user/
+      Handler: handler.lambda_handler
+      Runtime: python3.11
       Architectures:
         - x86_64
       Events:
@@ -110,12 +97,15 @@ Resources:
           RDS_DB: "integradoramelomix"
 
 Outputs:
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  RegisterUserApi:
+    Description: "API Gateway endpoint URL for Prod stage for Register User function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_user/"
+  GetUsersApi:
+    Description: "API Gateway endpoint URL for Prod stage for Get Users function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/"
+  UpdateUserApi:
+    Description: "API Gateway endpoint URL for Prod stage for Update User function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/"
+  DeleteUserApi:
+    Description: "API Gateway endpoint URL for Prod stage for Delete User function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/"

@@ -1,6 +1,7 @@
 import json
 import mysql.connector
 import os
+from datetime import datetime
 
 def lambda_handler(event, context):
     # Obtener variables de entorno
@@ -9,14 +10,19 @@ def lambda_handler(event, context):
     db_password = os.environ['RDS_PASSWORD']
     db_name = os.environ['RDS_DB']
 
-    # Obtener datos del usuario desde la solicitud
-    user_data = json.loads(event['body'])
-    user_id = user_data.get('user_id')
-
-    if not user_id:
+    # Obtener datos del usuario del evento
+    try:
+        body = json.loads(event['body'])
+        username = body['username']
+        email = body['email']
+        password = body['password']
+    except (KeyError, json.JSONDecodeError) as e:
         return {
             "statusCode": 400,
-            "body": json.dumps({"message": "Missing required user_id"})
+            "body": json.dumps({
+                "message": "Invalid input",
+                "error": str(e)
+            })
         }
 
     # Conectar a la base de datos RDS
@@ -29,21 +35,26 @@ def lambda_handler(event, context):
         )
         cursor = conn.cursor()
 
-        # Eliminar el usuario de la base de datos
-        sql = "DELETE FROM users WHERE user_id = %s"
-        val = (user_id,)
-        cursor.execute(sql, val)
+        # Insertar un nuevo usuario
+        date_joined = datetime.now().strftime('%Y-%m-%d')
+        insert_query = """
+            INSERT INTO users (username, email, password, date_joined)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (username, email, password, date_joined))
         conn.commit()
 
         response = {
-            "statusCode": 200,
-            "body": json.dumps({"message": "User deleted successfully"})
+            "statusCode": 201,
+            "body": json.dumps({
+                "message": "User created successfully"
+            })
         }
     except mysql.connector.Error as err:
         response = {
             "statusCode": 500,
             "body": json.dumps({
-                "message": "Error deleting user",
+                "message": "Error connecting to the database",
                 "error": str(err)
             })
         }
