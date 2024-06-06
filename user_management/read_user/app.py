@@ -1,7 +1,7 @@
 import json
-import mysql.connector
 import os
-from datetime import datetime
+import mysql.connector
+from datetime import date
 
 def lambda_handler(event, context):
     # Obtener variables de entorno
@@ -10,58 +10,48 @@ def lambda_handler(event, context):
     db_password = os.environ['RDS_PASSWORD']
     db_name = os.environ['RDS_DB']
 
-    # Obtener datos del usuario del evento
+    # Conexión a la base de datos
     try:
-        body = json.loads(event['body'])
-        username = body['username']
-        email = body['email']
-        password = body['password']
-    except (KeyError, json.JSONDecodeError) as e:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({
-                "message": "Invalid input",
-                "error": str(e)
-            })
-        }
-
-    # Conectar a la base de datos RDS
-    try:
-        conn = mysql.connector.connect(
+        connection = mysql.connector.connect(
             host=db_host,
             user=db_user,
             password=db_password,
             database=db_name
         )
-        cursor = conn.cursor()
 
-        # Insertar un nuevo usuario
-        date_joined = datetime.now().strftime('%Y-%m-%d')
-        insert_query = """
-            INSERT INTO users (username, email, password, date_joined)
-            VALUES (%s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (username, email, password, date_joined))
-        conn.commit()
+        cursor = connection.cursor()
 
-        response = {
-            "statusCode": 201,
-            "body": json.dumps({
-                "message": "User created successfully"
-            })
-        }
-    except mysql.connector.Error as err:
-        response = {
-            "statusCode": 500,
-            "body": json.dumps({
-                "message": "Error connecting to the database",
-                "error": str(err)
-            })
+        user_id = event['pathParameters']['user_id']
+
+        sql = "SELECT * FROM users WHERE user_id = %s"
+        cursor.execute(sql, (user_id,))
+        user = cursor.fetchone()
+
+        if user:
+            # Convertir la fecha a cadena de texto antes de serializar a JSON
+            user_date_joined_str = user[4].strftime('%Y-%m-%d')
+            user_dict = {
+                'user_id': user[0],
+                'username': user[1],
+                'email': user[2],
+                'password': user[3],
+                'date_joined': user_date_joined_str
+            }
+            return {
+                'statusCode': 200,
+                'body': json.dumps(user_dict)
+            }
+        else:
+            return {
+                'statusCode': 404,
+                'body': json.dumps('User not found')
+            }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f"Error: {str(e)}")
         }
     finally:
-        if cursor:
+        if 'connection' in locals():
             cursor.close()
-        if conn:
-            conn.close()
-
-    return response
+            connection.close()

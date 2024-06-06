@@ -12,12 +12,44 @@ Globals:
 
 Resources:
 
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+        - PolicyName: RDSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rds:DescribeDBInstances
+                  - rds:Connect
+                Resource: "*"
+
   CreateUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
       CodeUri: user_management/create_user/
       Handler: app.lambda_handler
       Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
       Events:
@@ -31,7 +63,9 @@ Resources:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradoramelomix"
+          RDS_DB: "melonmix"
+
+
 
   ReadUserFunction:
     Type: 'AWS::Serverless::Function'
@@ -39,73 +73,77 @@ Resources:
       CodeUri: user_management/read_user/
       Handler: app.lambda_handler
       Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
       Events:
-        GetUsers:
+        GetUser:
           Type: Api
           Properties:
-            Path: /read_user
+            Path: /read_user/{user_id}
             Method: get
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradoramelomix"
+          RDS_DB: "melonmix"
 
   UpdateUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
       CodeUri: user_management/update_user/
-      Handler: handler.lambda_handler
+      Handler: app.lambda_handler
       Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
       Events:
         UpdateUser:
           Type: Api
           Properties:
-            Path: /update_user
+            Path: /update_user/{user_id}
             Method: put
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradoramelomix"
+          RDS_DB: "melonmix"
+
 
   DeleteUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
       CodeUri: user_management/delete_user/
-      Handler: handler.lambda_handler
+      Handler: app.lambda_handler
       Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
       Events:
         DeleteUser:
           Type: Api
           Properties:
-            Path: /delete_user
+            Path: /delete_user/{user_id}
             Method: delete
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
-          RDS_DB: "integradoramelomix"
+          RDS_DB: "melonmix"
 
 Outputs:
   RegisterUserApi:
     Description: "API Gateway endpoint URL for Prod stage for Register User function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_user/"
-  GetUsersApi:
-    Description: "API Gateway endpoint URL for Prod stage for Get Users function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/"
+  GetUserApi:
+    Description: "API Gateway endpoint URL for Prod stage for Get User function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/{user_id}"
   UpdateUserApi:
     Description: "API Gateway endpoint URL for Prod stage for Update User function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/{user_id}"
   DeleteUserApi:
     Description: "API Gateway endpoint URL for Prod stage for Delete User function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/{user_id}"

@@ -1,68 +1,55 @@
 import json
-import mysql.connector
 import os
+import mysql.connector
 
 def lambda_handler(event, context):
-    # Obtener variables de entorno
-    db_host = os.environ['RDS_HOST']
-    db_user = os.environ['RDS_USER']
-    db_password = os.environ['RDS_PASSWORD']
-    db_name = os.environ['RDS_DB']
-
-    # Obtener el ID del usuario del evento
     try:
-        body = json.loads(event['body'])
-        user_id = body['user_id']
-    except (KeyError, json.JSONDecodeError) as e:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({
-                "message": "Invalid input",
-                "error": str(e)
-            })
-        }
+        db_host = os.environ['RDS_HOST']
+        db_user = os.environ['RDS_USER']
+        db_password = os.environ['RDS_PASSWORD']
+        db_name = os.environ['RDS_DB']
 
-    # Conectar a la base de datos RDS
-    try:
-        conn = mysql.connector.connect(
+        connection = mysql.connector.connect(
             host=db_host,
             user=db_user,
             password=db_password,
             database=db_name
         )
-        cursor = conn.cursor()
 
-        # Eliminar el usuario
-        delete_query = "DELETE FROM users WHERE user_id = %s"
-        cursor.execute(delete_query, (user_id,))
-        conn.commit()
+        cursor = connection.cursor()
 
-        if cursor.rowcount == 0:
-            response = {
-                "statusCode": 404,
-                "body": json.dumps({
-                    "message": "User not found"
-                })
+        user_id = event['pathParameters']['user_id']
+
+        sql = "DELETE FROM users WHERE user_id = %s"
+        cursor.execute(sql, (user_id,))
+        connection.commit()
+
+        if cursor.rowcount > 0:
+            return {
+                'statusCode': 200,
+                'body': json.dumps('User deleted successfully')
             }
         else:
-            response = {
-                "statusCode": 200,
-                "body": json.dumps({
-                    "message": "User deleted successfully"
-                })
+            return {
+                'statusCode': 404,
+                'body': json.dumps('User not found')
             }
+    except KeyError:
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Bad request. Missing required parameters.')
+        }
     except mysql.connector.Error as err:
-        response = {
-            "statusCode": 500,
-            "body": json.dumps({
-                "message": "Error connecting to the database",
-                "error": str(err)
-            })
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f"Database error: {str(err)}")
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f"Error: {str(e)}")
         }
     finally:
-        if cursor:
+        if 'connection' in locals():
             cursor.close()
-        if conn:
-            conn.close()
-
-    return response
+            connection.close()
