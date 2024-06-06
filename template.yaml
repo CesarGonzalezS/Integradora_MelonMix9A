@@ -134,6 +134,96 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
+
+  CreateFavoriteFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: favorites_managment/create_favorite/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        RegisterFavorite:
+          Type: Api
+          Properties:
+            Path: /create_favorite
+            Method: post
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+  ReadFavoriteFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: favorites_managment/read_favorite/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetFavorite:
+          Type: Api
+          Properties:
+            Path: /read_favorite/{favorite_id}
+            Method: get
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+  UpdateFavoriteFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: favorites_managment/update_favorite/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        UpdateFavorite:
+          Type: Api
+          Properties:
+            Path: /update_favorite/{favorite_id}
+            Method: put
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+  DeleteFavoriteFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: favorites_managment/delete_favorite/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        DeleteFavorite:
+          Type: Api
+          Properties:
+            Path: /delete_favorite/{favorite_id}
+            Method: delete
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+
 Outputs:
   RegisterUserApi:
     Description: "API Gateway endpoint URL for Prod stage for Register User function"
@@ -147,3 +237,16 @@ Outputs:
   DeleteUserApi:
     Description: "API Gateway endpoint URL for Prod stage for Delete User function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/{user_id}"
+
+  RegisterFavoriteApi:
+    Description: "API Gateway endpoint URL for Prod stage for Register Favorite function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_favorite/"
+  GetFavoriteApi:
+    Description: "API Gateway endpoint URL for Prod stage for Get Favorite function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_favorite/{favorite_id}"
+  UpdateFavoriteApi:
+    Description: "API Gateway endpoint URL for Prod stage for Update Favorite function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_favorite/{favorite_id}"
+  DeleteFavoriteApi:
+    Description: "API Gateway endpoint URL for Prod stage for Delete Favorite function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_favorite/{favorite_id}"
