@@ -2,19 +2,11 @@ version = 0.1
 
 [default.deploy]
 [default.deploy.parameters]
-<<<<<<< HEAD
-stack_name = "MelomixEntrega1"
-=======
 stack_name = "MelomixTDos"
->>>>>>> 14f2633320e7521b35ebde98fe57bbc12143f8c1
 region = "us-east-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
 resolve_s3 = true
-<<<<<<< HEAD
-s3_prefix = "MelomixEntrega1"
-=======
 s3_prefix = "MelomixTDos"
->>>>>>> 14f2633320e7521b35ebde98fe57bbc12143f8c1
 image_repositories = []

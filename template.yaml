@@ -218,6 +218,7 @@ Resources:
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
+  
 
   CreateArtistFunction:
     Type: 'AWS::Serverless::Function'
