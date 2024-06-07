@@ -1,12 +1,9 @@
 version = 0.1
-
-[default.deploy]
 [default.deploy.parameters]
-stack_name = "MelomixTDos"
-region = "us-east-2"
+stack_name = "MelomixINT"
+resolve_s3 = true
+s3_prefix = "MelomixINT"
+region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-disable_rollback = true
-resolve_s3 = true
-s3_prefix = "MelomixTDos"
 image_repositories = []
