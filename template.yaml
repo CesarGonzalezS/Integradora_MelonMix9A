@@ -395,6 +395,94 @@ Resources:
           RDS_USER: "admin"
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
+  CreateSongFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/song_management/create_song/  # Se ha actualizado la ruta de CodeUri
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        CreateSong:
+          Type: Api
+          Properties:
+            Path: /create_song
+            Method: post
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+  ReadSongFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/song_management/read_song/  # Se ha actualizado la ruta de CodeUri
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetSong:
+          Type: Api
+          Properties:
+            Path: /read_song/{song_id}
+            Method: get
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+  UpdateSongFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/song_management/update_song/  # Se ha actualizado la ruta de CodeUri
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        UpdateSong:
+          Type: Api
+          Properties:
+            Path: /update_song/{song_id}
+            Method: put
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
+  DeleteSongFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/song_management/delete_song/  # Se ha actualizado la ruta de CodeUri
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        DeleteSong:
+          Type: Api
+          Properties:
+            Path: /delete_song/{song_id}
+            Method: delete
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
 
 Outputs:
   CreateUserApi:
@@ -445,3 +533,15 @@ Outputs:
   DeleteAlbumsApi:
     Description: "API Gateway endpoint URL for Delete Albums Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_albums/"
+  CreateSongApi:
+    Description: "API Gateway endpoint URL for Prod stage for Create Song function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_song/"
+  GetSongApi:
+    Description: "API Gateway endpoint URL for Prod stage for Get Song function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_song/{song_id}"
+  UpdateSongApi:
+    Description: "API Gateway endpoint URL for Prod stage for Update Song function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_song/{song_id}"
+  DeleteSongApi:
+    Description: "API Gateway endpoint URL for Prod stage for Delete Song function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_song/{song_id}"
