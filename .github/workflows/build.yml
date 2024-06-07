@@ -63,13 +63,6 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f ${{ matrix.function.requirements }} ]; then pip install -r ${{ matrix.function.requirements }}; fi
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
-      - name: Install SAM CLI
-        run: |
-          pip install aws-sam-cli
       - name: Build SAM application
         run: sam build
       - name: Deploy SAM application
