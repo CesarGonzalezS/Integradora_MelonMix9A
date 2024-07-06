@@ -131,94 +131,7 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
-  CreateFavoriteFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/favorites_managment/create_favorite/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        RegisterFavorite:
-          Type: Api
-          Properties:
-            Path: /create_favorite
-            Method: post
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
 
-  ReadFavoriteFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/favorites_managment/read_favorite/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        GetFavorite:
-          Type: Api
-          Properties:
-            Path: /read_favorite/{favorite_id}
-            Method: get
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
-  UpdateFavoriteFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/favorites_managment/update_favorite/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        UpdateFavorite:
-          Type: Api
-          Properties:
-            Path: /update_favorite/{favorite_id}
-            Method: put
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
-  DeleteFavoriteFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/favorites_managment/delete_favorite/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        DeleteFavorite:
-          Type: Api
-          Properties:
-            Path: /delete_favorite/{favorite_id}
-            Method: delete
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-  
 
   CreateArtistFunction:
     Type: 'AWS::Serverless::Function'
@@ -242,27 +155,6 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
-  ReadArtistFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/artist_management/read_artist/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        ReadArtist:
-          Type: Api
-          Properties:
-            Path: /read_artist/{artist_id}
-            Method: get
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
 
   UpdateArtistFunction:
     Type: 'AWS::Serverless::Function'
@@ -308,87 +200,21 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
-  CreateAlbumsFunction:
+  LoginFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: lambdas/albums_management/create_albums/
+      CodeUri: cognito/login/
       Handler: app.lambda_handler
       Runtime: python3.11
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
       Events:
-        CreateAlbums:
+        LoginUser:
           Type: Api
           Properties:
-            Path: /create_albums
+            Path: /login
             Method: post
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
-  ReadAlbumsFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/albums_management/read_albums/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        ReadAlbums:
-          Type: Api
-          Properties:
-            Path: /read_albums/{album_id}
-            Method: get
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
-  UpdateAlbumsFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/albums_management/update_albums/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        UpdateAlbums:
-          Type: Api
-          Properties:
-            Path: /update_albums/{album_id}
-            Method: put
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
-  DeleteAlbumsFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/albums_management/delete_albums/
-      Handler: app.lambda_handler
-      Runtime: python3.11
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        DeleteAlbums:
-          Type: Api
-          Properties:
-            Path: /delete_albums/{album_id}
-            Method: delete
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
@@ -402,46 +228,37 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_user/"
   ReadUserApi:
     Description: "API Gateway endpoint URL for Read User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/{user_id}"
   UpdateUserApi:
     Description: "API Gateway endpoint URL for Update User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/{user_id}"
   DeleteUserApi:
     Description: "API Gateway endpoint URL for Delete User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/{user_id}"
   CreateFavoriteApi:
     Description: "API Gateway endpoint URL for Create Favorite Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_favorite/"
   ReadFavoriteApi:
     Description: "API Gateway endpoint URL for Read Favorite Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_favorite/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_favorite/{favorite_id}"
   UpdateFavoriteApi:
     Description: "API Gateway endpoint URL for Update Favorite Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_favorite/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_favorite/{favorite_id}"
   DeleteFavoriteApi:
     Description: "API Gateway endpoint URL for Delete Favorite Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_favorite/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_favorite/{favorite_id}"
   CreateArtistApi:
     Description: "API Gateway endpoint URL for Create Artist Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_artist/"
   ReadArtistApi:
     Description: "API Gateway endpoint URL for Read Artist Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_artist/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_artist/{artist_id}"
   UpdateArtistApi:
     Description: "API Gateway endpoint URL for Update Artist Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_artist/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_artist/{artist_id}"
   DeleteArtistApi:
     Description: "API Gateway endpoint URL for Delete Artist Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_artist/"
-  CreateAlbumsApi:
-    Description: "API Gateway endpoint URL for Create Albums Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_albums/"
-  ReadAlbumsApi:
-    Description: "API Gateway endpoint URL for Read Albums Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_albums/"
-  UpdateAlbumsApi:
-    Description: "API Gateway endpoint URL for Update Albums Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_albums/"
-  DeleteAlbumsApi:
-    Description: "API Gateway endpoint URL for Delete Albums Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_albums/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_artist/{artist_id}"
+  LoginApi:
+    Description: "API Gateway endpoint URL for Login Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/login/"

@@ -1,55 +1,56 @@
 import json
 import os
-import mysql.connector
+from pymysql import connect, Error as MySQLError
+def get_connection():
+    return connect(
+        host=os.environ['RDS_HOST'],
+        user=os.environ['RDS_USER'],
+        password=os.environ['RDS_PASSWORD'],
+        database=os.environ['RDS_DB']
+    )
 
 def lambda_handler(event, context):
+    connection = None
     try:
-        db_host = os.environ['RDS_HOST']
-        db_user = os.environ['RDS_USER']
-        db_password = os.environ['RDS_PASSWORD']
-        db_name = os.environ['RDS_DB']
+        body = json.loads(event['body'])
+        user_id = body.get('user_id')
 
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
-
-        cursor = connection.cursor()
-
-        user_id = event['pathParameters']['user_id']
-
-        sql = "DELETE FROM users WHERE user_id = %s"
-        cursor.execute(sql, (user_id,))
-        connection.commit()
-
-        if cursor.rowcount > 0:
+        # Validación de parámetros obligatorios
+        if not user_id:
             return {
-                'statusCode': 200,
-                'body': json.dumps('User deleted successfully')
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
             }
-        else:
+
+        # Eliminación de usuario en la base de datos
+        try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                sql = "DELETE FROM users WHERE user_id = %s"
+                cursor.execute(sql, (user_id,))
+            connection.commit()
+
+            if cursor.rowcount > 0:
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps({'message': 'Usuario eliminado exitosamente'})
+                }
+            else:
+                return {
+                    'statusCode': 404,
+                    'body': json.dumps({'message': 'Usuario no encontrado'})
+                }
+        except MySQLError as e:
             return {
-                'statusCode': 404,
-                'body': json.dumps('User not found')
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Error de base de datos: ' + str(e)})
             }
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'body': json.dumps('Bad request. Missing required parameters.')
-        }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
-        }
+        finally:
+            if connection:
+                connection.close()
+
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps({'message': 'Error interno del servidor: ' + str(e)})
         }
-    finally:
-        if 'connection' in locals():
-            cursor.close()
-            connection.close()
