@@ -1,53 +1,70 @@
 import json
 import os
-import mysql.connector
+from pymysql import connect, Error as MySQLError
+from datetime import datetime
+
+def get_connection():
+    return connect(
+        host=os.environ['RDS_HOST'],
+        user=os.environ['RDS_USER'],
+        password=os.environ['RDS_PASSWORD'],
+        database=os.environ['RDS_DB']
+    )
 
 def lambda_handler(event, context):
+    connection = None
     try:
-        db_host = os.environ['RDS_HOST']
-        db_user = os.environ['RDS_USER']
-        db_password = os.environ['RDS_PASSWORD']
-        db_name = os.environ['RDS_DB']
+        body = json.loads(event['body'])
+        username = body.get('username')
+        email = body.get('email')
+        password = body.get('password')
+        date_joined = body.get('date_joined')
 
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
+        # Validaciones de parámetros obligatorios
+        if not all([username, email, password, date_joined]):
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
+            }
 
-        cursor = connection.cursor()
+        # Validación de correo electrónico
+        if '@' not in email:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Correo electrónico no válido'})
+            }
 
-        data = json.loads(event['body'])
-        username = data['username']
-        email = data['email']
-        password = data['password']
-        date_joined = data['date_joined']
+        # Validación de fecha
+        try:
+            datetime.strptime(date_joined, '%Y-%m-%d')
+        except ValueError:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Fecha de unión no válida'})
+            }
 
-        sql = "INSERT INTO users (username, email, password, date_joined) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql, (username, email, password, date_joined))
-        connection.commit()
+        # Creación de usuario en la base de datos
+        try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO users (username, email, password, date_joined) VALUES (%s, %s, %s, %s)"
+                cursor.execute(sql, (username, email, password, date_joined))
+            connection.commit()
+            return {
+                'statusCode': 201,
+                'body': json.dumps({'message': 'Usuario creado exitosamente'})
+            }
+        except MySQLError as e:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Error de base de datos: ' + str(e)})
+            }
+        finally:
+            if connection:
+                connection.close()
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps('User created successfully')
-        }
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'body': json.dumps('Bad request. Missing required parameters.')
-        }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
-        }
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps({'message': 'Error interno del servidor: ' + str(e)})
         }
-    finally:
-        if 'connection' in locals():
-            cursor.close()
-            connection.close()

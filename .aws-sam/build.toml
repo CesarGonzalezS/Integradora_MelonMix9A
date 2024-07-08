@@ -73,7 +73,7 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["DeleteFavoriteFunction"]
 
-[function_build_definitions.7f79046e-7472-42e6-9b3b-c1c99f00fc79]
+[function_build_definitions.306214c0-b269-4b8d-90ba-eef5b8d9d37c]
 codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\artist_management\\create_artist"
 runtime = "python3.11"
 architecture = "x86_64"
@@ -91,7 +91,7 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["ReadArtistFunction"]
 
-[function_build_definitions.d9e84895-d453-4fa7-84a9-92d270b6278a]
+[function_build_definitions.59da6159-cfba-4a3b-a43a-f412efb7f2e9]
 codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\artist_management\\update_artist"
 runtime = "python3.11"
 architecture = "x86_64"
@@ -180,5 +180,14 @@ handler = "app.lambda_handler"
 manifest_hash = ""
 packagetype = "Zip"
 functions = ["DeleteSongFunction"]
+
+[function_build_definitions.f21ecd4e-9f32-47aa-a204-8e256768d9d3]
+codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\cognito\\login"
+runtime = "python3.11"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["LoginFunction"]
 
 [layer_build_definitions]

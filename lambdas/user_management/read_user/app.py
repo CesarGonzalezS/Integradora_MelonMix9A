@@ -21,7 +21,15 @@ def lambda_handler(event, context):
 
         cursor = connection.cursor()
 
-        user_id = event['pathParameters']['user_id']
+        if 'pathParameters' in event and 'user_id' in event['pathParameters']:
+            user_id = event['pathParameters']['user_id']
+        elif 'user_id' in event:
+            user_id = event['user_id']
+        else:
+            return {
+                'statusCode': 400,
+                'body': json.dumps('Missing user_id parameter')
+            }
 
         sql = "SELECT * FROM users WHERE user_id = %s"
         cursor.execute(sql, (user_id,))
