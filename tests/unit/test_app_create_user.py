@@ -1,10 +1,12 @@
 import unittest
 import json
+import base64
 from unittest.mock import patch, MagicMock
 from pymysql import Error as MySQLError
 import os
 
 from lambdas.user_management.create_user.app import lambda_handler
+
 
 class TestLambdaHandler(unittest.TestCase):
 
@@ -21,12 +23,17 @@ class TestLambdaHandler(unittest.TestCase):
         mock_get_connection.return_value = mock_connection
         mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
 
+        # Imagen binaria simulada
+        profile_image_binary = 'test_image_data'
+        encoded_image = base64.b64encode(profile_image_binary.encode('utf-8')).decode('utf-8')
+
         event = {
             'body': json.dumps({
                 'username': 'Cesargonzalea547',
                 'email': 'cesargonzalea547@gmail.com',
                 'password': 'Test123.',
-                'date_joined': '2024-07-05'
+                'date_joined': '2024-07-05',
+                'profile_image_binary': profile_image_binary
             })
         }
         context = {}
@@ -49,6 +56,7 @@ class TestLambdaHandler(unittest.TestCase):
                 'username': 'Cesargonzalea547',
                 'password': 'Test123.',
                 'date_joined': '2024-07-05'
+                # Falta profile_image_binary
             })
         }
         context = {}
@@ -58,6 +66,7 @@ class TestLambdaHandler(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         body = json.loads(response['body'])
         self.assertEqual(body['message'], 'Faltan parámetros obligatorios')
+
     @patch('lambdas.user_management.create_user.app.get_connection')
     def test_lambda_handler_invalid_email(self, mock_get_connection):
         # Simular una solicitud con correo electrónico inválido
@@ -66,7 +75,8 @@ class TestLambdaHandler(unittest.TestCase):
                 'username': 'Cesargonzalea547',
                 'email': 'invalid-email',  # Usar un correo electrónico inválido para esta prueba
                 'password': 'Test123.',
-                'date_joined': '2024-07-05'
+                'date_joined': '2024-07-05',
+                'profile_image_binary': 'test_image_data'
             })
         }
         context = {}
@@ -85,7 +95,8 @@ class TestLambdaHandler(unittest.TestCase):
                 'username': 'Cesargonzalea547',
                 'email': 'cesargonzalea547@gmail.com',
                 'password': 'Test123.',
-                'date_joined': '2024-02-30'  # Fecha inválida (30 de febrero)
+                'date_joined': '2024-02-30',  # Fecha inválida (30 de febrero)
+                'profile_image_binary': 'test_image_data'
             })
         }
         context = {}
@@ -108,7 +119,8 @@ class TestLambdaHandler(unittest.TestCase):
                 'username': 'Cesargonzalea547',
                 'email': 'cesargonzalea547@gmail.com',
                 'password': 'Test123.',
-                'date_joined': '2024-07-05'
+                'date_joined': '2024-07-05',
+                'profile_image_binary': 'test_image_data'
             })
         }
         context = {}
@@ -121,6 +133,6 @@ class TestLambdaHandler(unittest.TestCase):
 
         mock_connection.close.assert_called_once()
 
+    if __name__ == '__main__':
+        unittest.main()
 
-if __name__ == '__main__':
-    unittest.main()

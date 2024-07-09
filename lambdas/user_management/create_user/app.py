@@ -1,5 +1,6 @@
 import json
 import os
+import base64
 from pymysql import connect, Error as MySQLError
 from datetime import datetime
 
@@ -19,9 +20,10 @@ def lambda_handler(event, context):
         email = body.get('email')
         password = body.get('password')
         date_joined = body.get('date_joined')
+        profile_image_binary = body.get('profile_image_binary')
 
         # Validaciones de parámetros obligatorios
-        if not all([username, email, password, date_joined]):
+        if not all([username, email, password, date_joined, profile_image_binary]):
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
@@ -43,12 +45,24 @@ def lambda_handler(event, context):
                 'body': json.dumps({'message': 'Fecha de unión no válida'})
             }
 
+        # Convertir la imagen binaria a base64
+        try:
+            profile_image_base64 = base64.b64encode(profile_image_binary.encode('utf-8')).decode('utf-8')
+        except Exception as e:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Error al codificar la imagen a base64: ' + str(e)})
+            }
+
         # Creación de usuario en la base de datos
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                sql = "INSERT INTO users (username, email, password, date_joined) VALUES (%s, %s, %s, %s)"
-                cursor.execute(sql, (username, email, password, date_joined))
+                sql = """
+                INSERT INTO users (username, email, password, date_joined, profile_image_base64) 
+                VALUES (%s, %s, %s, %s, %s)
+                """
+                cursor.execute(sql, (username, email, password, date_joined, profile_image_base64))
             connection.commit()
             return {
                 'statusCode': 201,
