@@ -2,9 +2,9 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 import json
-from datetime import date  # Asegúrate de importar date desde datetime
+from datetime import date
 
-from lambdas.user_management.read_user.app import lambda_handler  # Reemplaza con el nombre de tu módulo lambda
+from lambdas.user_management.read_user.app import lambda_handler
 
 
 class TestLambdaHandler(unittest.TestCase):
@@ -19,21 +19,21 @@ class TestLambdaHandler(unittest.TestCase):
 
         # Mock de la consulta y resultados
         mock_cursor.execute.return_value = None
-        mock_cursor.fetchone.return_value = (1, 'test_user', 'test@example.com', 'password', date(2024, 7, 8))
+        mock_cursor.fetchall.return_value = [
+            (1, 'test_user', 'test@example.com', 'password', date(2024, 7, 8), 'base64encodedimage')
+        ]
 
         # Ejecutar la lambda handler
-        event = {
-            'pathParameters': {
-                'user_id': '1'
-            }
-        }
+        event = {}
         context = {}
         response = lambda_handler(event, context)
 
         # Verificar el resultado
         self.assertEqual(response['statusCode'], 200)
-        self.assertIn('user_id', json.loads(response['body']))
-        self.assertEqual(json.loads(response['body'])['user_id'], 1)
+        users = json.loads(response['body'])
+        self.assertIsInstance(users, list)
+        self.assertEqual(users[0]['user_id'], 1)
+        self.assertEqual(users[0]['profile_image_base64'], 'base64encodedimage')
 
     @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password',
                              'RDS_DB': 'test_db'})
@@ -45,22 +45,17 @@ class TestLambdaHandler(unittest.TestCase):
 
         # Mock de la consulta y resultados (usuario no encontrado)
         mock_cursor.execute.return_value = None
-        mock_cursor.fetchone.return_value = None
+        mock_cursor.fetchall.return_value = []
 
         # Ejecutar la lambda handler
-        event = {
-            'pathParameters': {
-                'user_id': '999'  # ID de usuario no existente
-            }
-        }
+        event = {}
         context = {}
         response = lambda_handler(event, context)
 
         # Verificar el resultado
         self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(response['body'], '"User not found"')
+        self.assertEqual(response['body'], '"No users found"')
 
 
 if __name__ == '__main__':
     unittest.main()
-

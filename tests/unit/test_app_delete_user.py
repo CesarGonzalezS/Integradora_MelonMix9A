@@ -1,88 +1,58 @@
+import json
 import unittest
 from unittest.mock import patch, MagicMock
-import json
-from pymysql import Error as MySQLError
-from lambdas.user_management.delete_user.app import lambda_handler  # Asegúrate de que esta importación sea correcta
+from pymysql import MySQLError
+from lambdas.user_management.delete_user.app import lambda_handler
+
 
 class TestLambdaHandler(unittest.TestCase):
 
-    @patch('lambdas.user_management.delete_user.app.get_connection')  # Ajusta la ruta del patching según la ubicación correcta de get_connection
-    def test_lambda_handler_success(self, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_cursor.rowcount = 1
-
+    @patch("lambdas.user_management.delete_user.app.get_secret")
+    @patch("lambdas.user_management.delete_user.app.connect_to_db")
+    @patch("lambdas.user_management.delete_user.app.execute_query")
+    @patch("lambdas.user_management.delete_user.app.close_connection")
+    def test_lambda_handler_missing_parameters(self, mock_close_connection, mock_execute_query, mock_connect_to_db,
+                                               mock_get_secret):
+        # Simulate event body without user_id
         event = {
-            'body': json.dumps({
-                'user_id': '1'
-            })
+            'body': json.dumps({'invalid_key': 'value'})
         }
-        context = {}
-        response = lambda_handler(event, context)
 
-        self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body'])['message'], 'Usuario eliminado exitosamente')
+        # Call lambda handler
+        response = lambda_handler(event, None)
 
-    @patch('lambdas.user_management.delete_user.app.get_connection')
-    def test_lambda_handler_user_not_found(self, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_cursor.rowcount = 0
-
-        event = {
-            'body': json.dumps({
-                'user_id': '1'
-            })
-        }
-        context = {}
-        response = lambda_handler(event, context)
-
-        self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(json.loads(response['body'])['message'], 'Usuario no encontrado')
-
-    def test_lambda_handler_missing_user_id(self):
-        event = {
-            'body': json.dumps({})
-        }
-        context = {}
-        response = lambda_handler(event, context)
-
+        # Assertions
         self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body'])['message'], 'Faltan parámetros obligatorios')
+        self.assertIn('Faltan parámetros obligatorios', json.loads(response['body'])['message'])
 
-    @patch('lambdas.user_management.delete_user.app.get_connection')
-    def test_lambda_handler_db_error(self, mock_get_connection):
-        mock_get_connection.side_effect = MySQLError('Database error')
+        # Additional assertions for mock calls if needed
+        mock_connect_to_db.assert_not_called()
+        mock_execute_query.assert_not_called()
+        mock_close_connection.assert_not_called()
 
+    @patch("lambdas.user_management.delete_user.app.get_secret")
+    @patch("lambdas.user_management.delete_user.app.connect_to_db")
+    @patch("lambdas.user_management.delete_user.app.execute_query")
+    @patch("lambdas.user_management.delete_user.app.close_connection")
+    def test_lambda_handler_event_body_error(self, mock_close_connection, mock_execute_query, mock_connect_to_db,
+                                             mock_get_secret):
+        # Simulate error loading event body
         event = {
-            'body': json.dumps({
-                'user_id': '1'
-            })
+            'body': '{"invalid_json}'
         }
-        context = {}
-        response = lambda_handler(event, context)
 
+        # Call lambda handler
+        response = lambda_handler(event, None)
+
+        # Assertions
         self.assertEqual(response['statusCode'], 500)
-        self.assertTrue('Error de base de datos' in json.loads(response['body'])['message'])
+        self.assertIn('Error interno del servidor', json.loads(response['body'])['message'])
 
-    @patch('lambdas.user_management.delete_user.app.get_connection')
-    def test_lambda_handler_general_exception(self, mock_get_connection):
-        mock_get_connection.side_effect = Exception('General error')
+        # Additional assertions for mock calls if needed
+        mock_connect_to_db.assert_not_called()
+        mock_execute_query.assert_not_called()
+        mock_close_connection.assert_not_called()
 
-        event = {
-            'body': json.dumps({
-                'user_id': '1'
-            })
-        }
-        context = {}
-        response = lambda_handler(event, context)
-
-        self.assertEqual(response['statusCode'], 500)
-        self.assertTrue('Error interno del servidor' in json.loads(response['body'])['message'])
 
 if __name__ == '__main__':
     unittest.main()

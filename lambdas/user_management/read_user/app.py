@@ -21,38 +21,34 @@ def lambda_handler(event, context):
 
         cursor = connection.cursor()
 
-        if 'pathParameters' in event and 'user_id' in event['pathParameters']:
-            user_id = event['pathParameters']['user_id']
-        elif 'user_id' in event:
-            user_id = event['user_id']
-        else:
-            return {
-                'statusCode': 400,
-                'body': json.dumps('Missing user_id parameter')
-            }
+        # Consulta para obtener todos los usuarios
+        sql = "SELECT user_id, username, email, password, date_joined, profile_image_base64 FROM users"
+        cursor.execute(sql)
+        users = cursor.fetchall()
 
-        sql = "SELECT * FROM users WHERE user_id = %s"
-        cursor.execute(sql, (user_id,))
-        user = cursor.fetchone()
+        if users:
+            users_list = []
+            for user in users:
+                # Convertir la fecha a cadena de texto antes de serializar a JSON
+                user_date_joined_str = user[4].strftime('%Y-%m-%d')
+                user_dict = {
+                    'user_id': user[0],
+                    'username': user[1],
+                    'email': user[2],
+                    'password': user[3],
+                    'date_joined': user_date_joined_str,
+                    'profile_image_base64': user[5]  # Añadir la imagen en base64
+                }
+                users_list.append(user_dict)
 
-        if user:
-            # Convertir la fecha a cadena de texto antes de serializar a JSON
-            user_date_joined_str = user[4].strftime('%Y-%m-%d')
-            user_dict = {
-                'user_id': user[0],
-                'username': user[1],
-                'email': user[2],
-                'password': user[3],
-                'date_joined': user_date_joined_str
-            }
             return {
                 'statusCode': 200,
-                'body': json.dumps(user_dict)
+                'body': json.dumps(users_list)
             }
         else:
             return {
                 'statusCode': 404,
-                'body': json.dumps('User not found')
+                'body': json.dumps('No users found')
             }
     except Exception as e:
         return {

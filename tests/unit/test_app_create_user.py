@@ -1,138 +1,105 @@
-import unittest
 import json
-import base64
-from unittest.mock import patch, MagicMock
-from pymysql import Error as MySQLError
 import os
-
+import unittest
+from unittest.mock import patch, MagicMock
 from lambdas.user_management.create_user.app import lambda_handler
-
 
 class TestLambdaHandler(unittest.TestCase):
 
-    @patch.dict(os.environ, {
-        'RDS_HOST': 'testhost',
-        'RDS_USER': 'testuser',
-        'RDS_PASSWORD': 'testpassword',
-        'RDS_DB': 'testdb'
-    })
-    @patch('lambdas.user_management.create_user.app.get_connection')
-    def test_lambda_handler_success(self, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
-
-        # Imagen binaria simulada
-        profile_image_binary = 'test_image_data'
-        encoded_image = base64.b64encode(profile_image_binary.encode('utf-8')).decode('utf-8')
-
-        event = {
-            'body': json.dumps({
-                'username': 'Cesargonzalea547',
-                'email': 'cesargonzalea547@gmail.com',
-                'password': 'Test123.',
-                'date_joined': '2024-07-05',
-                'profile_image_binary': profile_image_binary
-            })
+    @patch("lambdas.user_management.create_user.app.get_secret")
+    @patch("lambdas.user_management.create_user.app.connect_to_db")
+    @patch("lambdas.user_management.create_user.app.close_connection")
+    def test_lambda_handler_success(self, mock_close_connection, mock_connect_to_db, mock_get_secret):
+        apigw_event = {
+            'body': '{"username": "testuser", "email": "testuser@example.com", "password": "password123", "date_joined": "2023-07-08", "profile_image_binary": "aGVsbG8gd29ybGQ="}'
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        mock_connection = MagicMock()
+        mock_connect_to_db.return_value = mock_connection
+        mock_get_secret.return_value = {
+            "host": "mock_host",
+            "username": "mock_user",
+            "password": "mock_password"
+        }
+
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 201)
-        body = json.loads(response['body'])
-        self.assertEqual(body['message'], 'Usuario creado exitosamente')
+        self.assertEqual(json.loads(response['body'])['message'], 'Usuario creado exitosamente')
 
-        mock_cursor.execute.assert_called_once()
-        mock_connection.commit.assert_called_once()
-        mock_connection.close.assert_called_once()
+        mock_get_secret.assert_called_once()
+        mock_connect_to_db.assert_called_once_with("mock_host", "mock_user", "mock_password", os.getenv('RDS_DB'))
+        mock_close_connection.assert_called_once_with(mock_connection)
 
-    @patch('lambdas.user_management.create_user.app.get_connection')
-    def test_lambda_handler_missing_parameters(self, mock_get_connection):
-        # Simular una solicitud sin los parámetros obligatorios
-        event = {
-            'body': json.dumps({
-                'username': 'Cesargonzalea547',
-                'password': 'Test123.',
-                'date_joined': '2024-07-05'
-                # Falta profile_image_binary
-            })
+    @patch("lambdas.user_management.create_user.app.get_secret")
+    @patch("lambdas.user_management.create_user.app.connect_to_db")
+    @patch("lambdas.user_management.create_user.app.close_connection")
+    def test_lambda_handler_missing_parameters(self, mock_close_connection, mock_connect_to_db, mock_get_secret):
+        apigw_event = {
+            'body': '{"username": "testuser", "email": "", "password": "password123", "date_joined": "2023-07-08", "profile_image_binary": "aGVsbG8gd29ybGQ="}'
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 400)
-        body = json.loads(response['body'])
-        self.assertEqual(body['message'], 'Faltan parámetros obligatorios')
+        self.assertEqual(json.loads(response['body'])['message'], 'Faltan parámetros obligatorios')
 
-    @patch('lambdas.user_management.create_user.app.get_connection')
-    def test_lambda_handler_invalid_email(self, mock_get_connection):
-        # Simular una solicitud con correo electrónico inválido
-        event = {
-            'body': json.dumps({
-                'username': 'Cesargonzalea547',
-                'email': 'invalid-email',  # Usar un correo electrónico inválido para esta prueba
-                'password': 'Test123.',
-                'date_joined': '2024-07-05',
-                'profile_image_binary': 'test_image_data'
-            })
+        mock_get_secret.assert_not_called()
+        mock_connect_to_db.assert_not_called()
+        mock_close_connection.assert_not_called()
+
+
+    @patch("lambdas.user_management.create_user.app.get_secret")
+    @patch("lambdas.user_management.create_user.app.connect_to_db")
+    @patch("lambdas.user_management.create_user.app.close_connection")
+    def test_lambda_handler_invalid_email(self, mock_close_connection, mock_connect_to_db, mock_get_secret):
+        apigw_event = {
+            'body': '{"username": "testuser", "email": "invalid_email", "password": "password123", "date_joined": "2023-07-08", "profile_image_binary": "aGVsbG8gd29ybGQ="}'
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 400)
-        body = json.loads(response['body'])
-        self.assertEqual(body['message'], 'Correo electrónico no válido')
+        self.assertEqual(json.loads(response['body'])['message'], 'Correo electrónico no válido')
 
-    @patch('lambdas.user_management.create_user.app.get_connection')
-    def test_lambda_handler_invalid_date(self, mock_get_connection):
-        # Simular una solicitud con fecha de unión inválida
-        event = {
-            'body': json.dumps({
-                'username': 'Cesargonzalea547',
-                'email': 'cesargonzalea547@gmail.com',
-                'password': 'Test123.',
-                'date_joined': '2024-02-30',  # Fecha inválida (30 de febrero)
-                'profile_image_binary': 'test_image_data'
-            })
+        mock_get_secret.assert_not_called()
+        mock_connect_to_db.assert_not_called()
+        mock_close_connection.assert_not_called()
+
+    @patch("lambdas.user_management.create_user.app.get_secret")
+    @patch("lambdas.user_management.create_user.app.connect_to_db")
+    @patch("lambdas.user_management.create_user.app.close_connection")
+    def test_lambda_handler_invalid_date(self, mock_close_connection, mock_connect_to_db, mock_get_secret):
+        apigw_event = {
+            'body': '{"username": "testuser", "email": "testuser@example.com", "password": "password123", "date_joined": "invalid_date", "profile_image_binary": "aGVsbG8gd29ybGQ="}'
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 400)
-        body = json.loads(response['body'])
-        self.assertEqual(body['message'], 'Fecha de unión no válida')
+        self.assertEqual(json.loads(response['body'])['message'], 'Fecha de unión no válida')
 
-    @patch('lambdas.user_management.create_user.app.get_connection')
-    def test_lambda_handler_database_error(self, mock_get_connection):
-        # Simular un error de base de datos
-        mock_connection = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.side_effect = MySQLError('Database error')
+        mock_get_secret.assert_not_called()
+        mock_connect_to_db.assert_not_called()
+        mock_close_connection.assert_not_called()
 
-        event = {
-            'body': json.dumps({
-                'username': 'Cesargonzalea547',
-                'email': 'cesargonzalea547@gmail.com',
-                'password': 'Test123.',
-                'date_joined': '2024-07-05',
-                'profile_image_binary': 'test_image_data'
-            })
+    @patch("lambdas.user_management.create_user.app.get_secret")
+    @patch("lambdas.user_management.create_user.app.connect_to_db")
+    @patch("lambdas.user_management.create_user.app.close_connection")
+    def test_lambda_handler_encoding_error(self, mock_close_connection, mock_connect_to_db, mock_get_secret):
+        apigw_event = {
+            'body': '{"username": "testuser", "email": "testuser@example.com", "password": "password123", "date_joined": "2023-07-08", "profile_image_binary": "invalid_binary"}'
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
-        self.assertEqual(response['statusCode'], 500)  # Ajustar el código de estado esperado a 500
-        body = json.loads(response['body'])
-        self.assertIn('Error de base de datos', body['message'])
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('Error al codificar la imagen a base64', json.loads(response['body'])['message'])
 
-        mock_connection.close.assert_called_once()
+        mock_get_secret.assert_not_called()
+        mock_connect_to_db.assert_not_called()
+        mock_close_connection.assert_not_called()
 
-    if __name__ == '__main__':
-        unittest.main()
 
+if __name__ == '__main__':
+    unittest.main()

@@ -1,27 +1,27 @@
 import json
 import os
-import mysql.connector
+import logging
+from connection_bd import connect_to_db, execute_query, close_connection
+from get_secrets import get_secret
+
+logging.basicConfig(level=logging.INFO)
+
 
 def lambda_handler(event, context):
     try:
-        db_host = os.environ['RDS_HOST']
-        db_user = os.environ['RDS_USER']
-        db_password = os.environ['RDS_PASSWORD']
-        db_name = os.environ['RDS_DB']
+        # Obtener secretos de AWS Secrets Manager
+        db_secret_name = os.environ['DB_SECRET_NAME']
+        region_name = os.environ['REGION_NAME']
+        db_secret = get_secret(db_secret_name, region_name)
 
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
+        # Conectar a la base de datos
+        connection = connect_to_db(db_secret['host'], db_secret['username'], db_secret['password'], db_secret['dbname'])
 
-        cursor = connection.cursor()
-
+        # Ejecutar consulta SQL
         sql = "SELECT * FROM users"
-        cursor.execute(sql)
-        results = cursor.fetchall()
+        results = execute_query(connection, sql)
 
+        # Procesar resultados
         users = []
         for user in results:
             user_dict = {
@@ -37,17 +37,12 @@ def lambda_handler(event, context):
             'statusCode': 200,
             'body': json.dumps(users)
         }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
-        }
     except Exception as e:
+        logging.error(f"Error in lambda_handler: {e}")
         return {
             'statusCode': 500,
             'body': json.dumps(f"Error: {str(e)}")
         }
     finally:
         if 'connection' in locals():
-            cursor.close()
-            connection.close()
+            close_connection(connection)
