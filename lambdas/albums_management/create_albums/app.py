@@ -1,52 +1,58 @@
 import json
 import os
 import mysql.connector
+from lambdas.album_management.create_album.get_secrets import get_secret
+from lambdas.album_management.create_album.connection_bd import connect_to_db, execute_query, close_connection
 
 def lambda_handler(event, context):
     try:
-        db_host = os.environ['RDS_HOST']
-        db_user = os.environ['RDS_USER']
-        db_password = os.environ['RDS_PASSWORD']
-        db_name = os.environ['RDS_DB']
+        body = json.loads(event['body'])
 
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
+        title = body.get('title')
+        release_date = body.get('release_date')
+        artist_id = body.get('artist_id')
 
-        cursor = connection.cursor()
+        if not title or not release_date or not artist_id:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
+            }
 
-        data = json.loads(event['body'])
-        title = data['title']
-        release_date = data['release_date']
-        artist_id = data['artist_id']
+        try:
+            release_date = datetime.datetime.strptime(release_date, '%Y-%m-%d')
+        except ValueError:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Fecha de lanzamiento no válida'})
+            }
 
-        sql = "INSERT INTO albums (title, release_date, artist_id) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (title, release_date, artist_id))
-        connection.commit()
+        try:
+            secrets = get_secret(os.getenv('SECRET_NAME'), os.getenv('REGION_NAME'))
+            connection = connect_to_db(secrets['host'], secrets['username'], secrets['password'], os.getenv('RDS_DB'))
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps('Album created successfully')
-        }
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'body': json.dumps('Bad request. Missing required parameters.')
-        }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
-        }
+            query = "INSERT INTO albums (title, release_date, artist_id) VALUES (%s, %s, %s)"
+            execute_query(connection, query, (title, release_date, artist_id))
+
+            close_connection(connection)
+
+            return {
+                'statusCode': 201,
+                'body': json.dumps({'message': 'Álbum creado exitosamente'})
+            }
+        except mysql.connector.Error as err:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': f'Error en la base de datos: {str(err)}'})
+            }
+        except Exception as e:
+            # Log the exception for debugging purposes
+            print(f"Unexpected error: {str(e)}")
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Error interno del servidor'})
+            }
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps({'message': 'Error interno del servidor'})
         }
-    finally:
-        if 'connection' in locals():
-            cursor.close()
-            connection.close()
