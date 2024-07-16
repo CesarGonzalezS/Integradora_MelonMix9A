@@ -1,5 +1,3 @@
-# connection_bd.py
-
 import pymysql
 import logging
 
@@ -19,12 +17,12 @@ def connect_to_db(host, user, password, database):
         logging.error("Error connecting to the database: %s", e)
         raise e
 
-def execute_query(connection, query):
+def execute_query(connection, query, params=None):
     try:
         with connection.cursor() as cursor:
-            cursor.execute(query)
-            result = cursor.fetchall()
-            return result
+            cursor.execute(query, params)
+            connection.commit()
+            return True
     except Exception as e:
         logging.error("Error executing query: %s", e)
         raise e

@@ -1,25 +1,24 @@
-# connection_bd.py
-
 import pymysql
+import os
 import logging
+from lambdas.user_management.read_all_users.get_secrets import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
-
-def connect_to_db(host, user, password, database):
+def connect_to_db():
     try:
+        secrets = get_secret(os.getenv('SECRET_NAME'), os.getenv('REGION_NAME'))
         connection = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
+            host=secrets['host'],
+            user=secrets['username'],
+            password=secrets['password'],
+            database=os.getenv('RDS_DB')
         )
         logging.info("Connection established successfully.")
         return connection
     except Exception as e:
         logging.error("Error connecting to the database: %s", e)
         raise e
-
 
 def execute_query(connection, query):
     try:
@@ -30,7 +29,6 @@ def execute_query(connection, query):
     except Exception as e:
         logging.error("Error executing query: %s", e)
         raise e
-
 
 def close_connection(connection):
     try:
