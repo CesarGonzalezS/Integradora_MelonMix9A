@@ -1,132 +1,139 @@
-import unittest
 import json
-from unittest.mock import patch, MagicMock
 import os
-from mysql.connector import Error as MySQLError
-
-from lambdas.delete.app import lambda_handler
-
+import unittest
+from unittest.mock import patch, MagicMock
+from app import lambda_handler
 
 class TestLambdaHandler(unittest.TestCase):
 
-    @patch.dict(os.environ, {
-        'RDS_HOST': 'testhost',
-        'RDS_USER': 'testuser',
-        'RDS_PASSWORD': 'testpassword',
-        'RDS_DB': 'testdb'
-    })
-    @patch('lambdas.delete.app.mysql.connector.connect')
+    @patch("app.mysql.connector.connect")
     def test_lambda_handler_success(self, mock_connect):
+        apigw_event = {
+            'body': json.dumps({
+                'artist_id': 1
+            })
+        }
+
+        # Mock de conexión y cursor
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_connection
         mock_connection.cursor.return_value = mock_cursor
 
-        event = {
-            'body': json.dumps({
-                'artist_id': 123
-            })
-        }
-        context = {}
-
-        # Mock para simular la eliminación exitosa
         mock_cursor.rowcount = 1
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
+        # Verificaciones
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), 'Artist deleted successfully')
+        self.assertEqual(response['body'], json.dumps('Artist deleted successfully'))
 
+        mock_connect.assert_called_once_with(
+            host=os.environ['RDS_HOST'],
+            user=os.environ['RDS_USER'],
+            password=os.environ['RDS_PASSWORD'],
+            database=os.environ['RDS_DB']
+        )
         mock_cursor.execute.assert_called_once_with(
             "DELETE FROM artists WHERE artist_id = %s",
-            (123,)
+            (1,)
         )
         mock_connection.commit.assert_called_once()
         mock_cursor.close.assert_called_once()
         mock_connection.close.assert_called_once()
 
-    @patch('lambdas.delete.app.mysql.connector.connect')
+    @patch("app.mysql.connector.connect")
     def test_lambda_handler_artist_not_found(self, mock_connect):
+        apigw_event = {
+            'body': json.dumps({
+                'artist_id': 1
+            })
+        }
+
+        # Mock de conexión y cursor
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_connection
         mock_connection.cursor.return_value = mock_cursor
 
-        event = {
-            'body': json.dumps({
-                'artist_id': 456
-            })
-        }
-        context = {}
-
-        # Mock para simular la no existencia del artista
         mock_cursor.rowcount = 0
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
+        # Verificaciones
         self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(json.loads(response['body']), 'Artist not found')
+        self.assertEqual(response['body'], json.dumps('Artist not found'))
 
+        mock_connect.assert_called_once_with(
+            host=os.environ['RDS_HOST'],
+            user=os.environ['RDS_USER'],
+            password=os.environ['RDS_PASSWORD'],
+            database=os.environ['RDS_DB']
+        )
         mock_cursor.execute.assert_called_once_with(
             "DELETE FROM artists WHERE artist_id = %s",
-            (456,)
+            (1,)
         )
         mock_connection.commit.assert_called_once()
         mock_cursor.close.assert_called_once()
         mock_connection.close.assert_called_once()
 
-    @patch('lambdas.delete.app.mysql.connector.connect')
+    @patch("app.mysql.connector.connect")
     def test_lambda_handler_missing_parameters(self, mock_connect):
-        event = {
-            'body': json.dumps({
-                # Falta 'artist_id'
-            })
+        apigw_event = {
+            'body': json.dumps({})
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body']), 'Bad request. Missing required parameters.')
+        self.assertEqual(response['body'], json.dumps('Bad request. Missing required parameters.'))
 
-    @patch('lambdas.delete.app.mysql.connector.connect')
-    def test_lambda_handler_database_error(self, mock_connect):
-        mock_connection = MagicMock()
-        mock_connect.return_value = mock_connection
-        mock_cursor = MagicMock()
-        mock_connection.cursor.side_effect = MySQLError("Database error")
+        mock_connect.assert_not_called()
 
-        event = {
+    @patch("app.mysql.connector.connect")
+    def test_lambda_handler_db_error(self, mock_connect):
+        apigw_event = {
             'body': json.dumps({
-                'artist_id': 789
+                'artist_id': 1
             })
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        mock_connect.side_effect = mysql.connector.Error("Mocked DB Error")
+
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertIn('Database error', json.loads(response['body']))
+        self.assertEqual(response['body'], json.dumps("Database error: Mocked DB Error"))
 
-        mock_cursor.close.assert_called_once()
-        mock_connection.close.assert_called_once()
+        mock_connect.assert_called_once_with(
+            host=os.environ['RDS_HOST'],
+            user=os.environ['RDS_USER'],
+            password=os.environ['RDS_PASSWORD'],
+            database=os.environ['RDS_DB']
+        )
 
-    @patch('lambdas.delete.app.mysql.connector.connect')
+    @patch("app.mysql.connector.connect")
     def test_lambda_handler_general_error(self, mock_connect):
-        mock_connect.side_effect = Exception("General error")
-
-        event = {
+        apigw_event = {
             'body': json.dumps({
-                'artist_id': 987
+                'artist_id': 1
             })
         }
-        context = {}
 
-        response = lambda_handler(event, context)
+        mock_connect.side_effect = Exception("Mocked General Error")
+
+        response = lambda_handler(apigw_event, None)
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertIn('General error', json.loads(response['body']))
+        self.assertEqual(response['body'], json.dumps("Error: Mocked General Error"))
 
-    if __name__ == '__main__':
-        unittest.main()
+        mock_connect.assert_called_once_with(
+            host=os.environ['RDS_HOST'],
+            user=os.environ['RDS_USER'],
+            password=os.environ['RDS_PASSWORD'],
+            database=os.environ['RDS_DB']
+        )
 
+if __name__ == '__main__':
+    unittest.main()
