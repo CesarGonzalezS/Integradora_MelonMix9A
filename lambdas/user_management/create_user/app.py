@@ -8,9 +8,6 @@ from lambdas.user_management.create_user.connection_bd import connect_to_db, exe
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
-
-
-
         username = body.get('username')
         email = body.get('email')
         password = body.get('password')
@@ -45,8 +42,6 @@ def lambda_handler(event, context):
                 'body': json.dumps({'message': f'Error al codificar la imagen a base64: {str(e)}'})
             }
 
-
-
         try:
             secrets = get_secret(os.getenv('SECRET_NAME'), os.getenv('REGION_NAME'))
             connection = connect_to_db(secrets['host'], secrets['username'], secrets['password'], os.getenv('RDS_DB'))
@@ -75,4 +70,4 @@ def lambda_handler(event, context):
         }
 
 
-    
+
