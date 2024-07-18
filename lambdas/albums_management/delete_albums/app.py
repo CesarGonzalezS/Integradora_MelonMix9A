@@ -1,55 +1,59 @@
 import json
 import os
-import mysql.connector
+from pymysql import Error as MySQLError
+from get_secrets import get_secret
+from connection_bd import connect_to_db, execute_query, close_connection
 
 def lambda_handler(event, context):
     try:
-        db_host = os.environ['RDS_HOST']
-        db_user = os.environ['RDS_USER']
-        db_password = os.environ['RDS_PASSWORD']
-        db_name = os.environ['RDS_DB']
+        body = json.loads(event['body'])
+        album_id = body.get('album_id')
 
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
-
-        cursor = connection.cursor()
-
-        album_id = event['pathParameters']['album_id']
-
-        sql = "DELETE FROM albums WHERE album_id = %s"
-        cursor.execute(sql, (album_id,))
-        connection.commit()
-
-        if cursor.rowcount > 0:
+        if not album_id:
             return {
-                'statusCode': 200,
-                'body': json.dumps('Album deleted successfully')
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
             }
-        else:
+
+        try:
+            secrets = get_secret(os.getenv('SECRET_NAME'), os.getenv('REGION_NAME'))
+            connection = connect_to_db(secrets['host'], secrets['username'], secrets['password'], os.getenv('RDS_DB'))
+
+            query = "DELETE FROM albums WHERE album_id = %s"
+
+            if execute_query(connection, query, (album_id,)):
+                if connection.cursor().rowcount > 0:
+                    close_connection(connection)
+                    return {
+                        'statusCode': 200,
+                        'body': json.dumps({'message': 'Álbum eliminado exitosamente'})
+                    }
+                else:
+                    close_connection(connection)
+                    return {
+                        'statusCode': 404,
+                        'body': json.dumps({'message': 'Álbum no encontrado'})
+                    }
+            else:
+                close_connection(connection)
+                return {
+                    'statusCode': 500,
+                    'body': json.dumps({'message': 'Error interno del servidor'})
+                }
+
+        except MySQLError as e:
             return {
-                'statusCode': 404,
-                'body': json.dumps('Album not found')
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Error de base de datos: ' + str(e)})
             }
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'body': json.dumps('Bad request. Missing required parameters.')
-        }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
-        }
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Error interno del servidor: ' + str(e)})
+            }
+
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps({'message': 'Error interno del servidor: ' + str(e)})
         }
-    finally:
-        if 'connection' in locals():
-            cursor.close()
-            connection.close()
