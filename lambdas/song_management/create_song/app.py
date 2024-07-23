@@ -1,6 +1,7 @@
 import json
 import os
 import mysql.connector
+from mysql.connector import errorcode
 
 def lambda_handler(event, context):
     try:
@@ -33,20 +34,31 @@ def lambda_handler(event, context):
             'statusCode': 200,
             'body': json.dumps('Song created successfully')
         }
-    except KeyError:
+    except KeyError as e:
         return {
             'statusCode': 400,
-            'body': json.dumps('Bad request. Missing required parameters.')
+            'body': json.dumps(f'Bad request. Missing required parameters: {str(e)}')
         }
     except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
-        }
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            return {
+                'statusCode': 500,
+                'body': json.dumps('Something is wrong with your user name or password')
+            }
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            return {
+                'statusCode': 500,
+                'body': json.dumps('Database does not exist')
+            }
+        else:
+            return {
+                'statusCode': 500,
+                'body': json.dumps(f'Database error: {str(err)}')
+            }
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps(f'Error: {str(e)}')
         }
     finally:
         if 'connection' in locals():

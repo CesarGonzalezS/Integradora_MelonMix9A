@@ -100,7 +100,7 @@ Resources:
         UpdateUser:
           Type: Api
           Properties:
-            Path: /update_user/{user_id}
+            Path: /update_user
             Method: put
       Environment:
         Variables:
@@ -169,7 +169,7 @@ Resources:
         UpdateArtist:
           Type: Api
           Properties:
-            Path: /update_artist/{artist_id}
+            Path: /update_artist
             Method: put
       Environment:
         Variables:
@@ -257,7 +257,7 @@ Resources:
         UpdateAlbums:
           Type: Api
           Properties:
-            Path: /update_albums/{album_id}
+            Path: /update_albums
             Method: put
       Environment:
         Variables:
