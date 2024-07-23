@@ -1,61 +1,56 @@
 import json
-import os
-import mysql.connector
-from datetime import date
+import boto3
+import pymysql
+from botocore.exceptions import ClientError
+from lambdas.user_management.read_user.connection_bd import connect_to_db, execute_query
+from lambdas.user_management.read_user.get_secrets import get_secret
+
+
+def read_users(username=None):
+    try:
+        # Obtener secretos de AWS Secrets Manager
+        secrets = get_secret()
+
+        # Conectarse a la base de datos
+        connection = connect_to_db(secrets)
+
+        # Construir la consulta
+        if username:
+            query = "SELECT * FROM users WHERE username = %s"
+            params = (username,)
+        else:
+            query = "SELECT * FROM users"
+            params = None
+
+        # Ejecutar la consulta
+        users = execute_query(connection, query, params)
+
+        # Cerrar la conexión
+        connection.close()
+
+        return users
+    except ClientError as e:
+        print(f"Error obtaining secret: {e}")
+        raise e
+    except pymysql.MySQLError as e:
+        print(f"Error connecting to MySQL: {e}")
+        raise e
+
 
 def lambda_handler(event, context):
-    # Obtener variables de entorno
-    db_host = os.environ['RDS_HOST']
-    db_user = os.environ['RDS_USER']
-    db_password = os.environ['RDS_PASSWORD']
-    db_name = os.environ['RDS_DB']
-
-    # Conexión a la base de datos
     try:
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
+        # Obtener el parámetro `username` del evento
+        username = event.get('username')
 
-        cursor = connection.cursor()
+        # Leer usuarios
+        users = read_users(username)
 
-        # Consulta para obtener todos los usuarios
-        sql = "SELECT user_id, username, email, password, date_joined, profile_image_base64 FROM users"
-        cursor.execute(sql)
-        users = cursor.fetchall()
-
-        if users:
-            users_list = []
-            for user in users:
-                # Convertir la fecha a cadena de texto antes de serializar a JSON
-                user_date_joined_str = user[4].strftime('%Y-%m-%d')
-                user_dict = {
-                    'user_id': user[0],
-                    'username': user[1],
-                    'email': user[2],
-                    'password': user[3],
-                    'date_joined': user_date_joined_str,
-                    'profile_image_base64': user[5]  # Añadir la imagen en base64
-                }
-                users_list.append(user_dict)
-
-            return {
-                'statusCode': 200,
-                'body': json.dumps(users_list)
-            }
-        else:
-            return {
-                'statusCode': 404,
-                'body': json.dumps('No users found')
-            }
+        return {
+            'statusCode': 200,
+            'body': json.dumps(users)
+        }
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps({'error': str(e)})
         }
-    finally:
-        if 'connection' in locals():
-            cursor.close()
-            connection.close()
