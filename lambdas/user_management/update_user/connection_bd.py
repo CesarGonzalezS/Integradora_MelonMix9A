@@ -5,6 +5,7 @@ from lambdas.user_management.read_all_users.get_secrets import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
+
 def connect_to_db():
     try:
         secrets = get_secret(os.getenv('SECRET_NAME'), os.getenv('REGION_NAME'))
@@ -20,6 +21,7 @@ def connect_to_db():
         logging.error("Error connecting to the database: %s", e)
         raise e
 
+
 def execute_query(connection, query):
     try:
         with connection.cursor() as cursor:
@@ -29,6 +31,7 @@ def execute_query(connection, query):
     except Exception as e:
         logging.error("Error executing query: %s", e)
         raise e
+
 
 def close_connection(connection):
     try:

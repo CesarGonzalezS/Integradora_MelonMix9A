@@ -1,80 +1,65 @@
 import json
-import os
-import mysql.connector
+import boto3
+import pymysql
+from botocore.exceptions import ClientError
+from lambdas.user_management.update_user.connection_bd import connect_to_db, execute_query
+from lambdas.user_management.update_user.get_secrets import get_secret
 
-# Función para establecer la conexión a la base de datos
-def get_database_connection():
-    db_host = os.environ['RDS_HOST']
-    db_user = os.environ['RDS_USER']
-    db_password = os.environ['RDS_PASSWORD']
-    db_name = os.environ['RDS_DB']
 
-    return mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
-    )
-
-# Función para ejecutar una consulta SQL
-def execute_sql(connection, sql, params):
-    cursor = connection.cursor()
-    cursor.execute(sql, params)
-    connection.commit()
-    return cursor
 def lambda_handler(event, context):
     try:
-        # Validar y obtener los datos del evento
-        data = json.loads(event['body'])
-        user_id = data.get('user_id')
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
-        date_joined = data.get('date_joined')
+        # Extraer parámetros del evento
+        user_id = event.get('user_id')
+        username = event.get('username')
+        email = event.get('email')
+        password = event.get('password')
 
-        if not user_id or not username or not email or not password or not date_joined:
+        # Validar los parámetros necesarios
+        if not user_id or not username or not email or not password:
             return {
                 'statusCode': 400,
-                'body': json.dumps('Bad request. Missing required parameters.')
+                'body': json.dumps({'message': 'Faltan parámetros requeridos'})
             }
 
-        # Establecer conexión a la base de datos
-        connection = get_database_connection()
+        # Obtener credenciales de la base de datos
+        secret_name = "db_credentials"  # Nombre del secreto en AWS Secrets Manager
+        secrets = get_secret(secret_name)
+        db_host = secrets['host']
+        db_user = secrets['username']
+        db_password = secrets['password']
+        db_name = secrets['dbname']
 
-        # Obtener cursor para ejecutar consultas
-        cursor = connection.cursor()
+        # Conectar a la base de datos
+        connection = connect_to_db(db_host, db_user, db_password, db_name)
 
-        # Ejecutar la actualización en la base de datos
-        sql = "UPDATE users SET username = %s, email = %s, password = %s, date_joined = %s WHERE user_id = %s"
-        execute_sql(connection, sql, (username, email, password, date_joined, user_id))
+        # Consulta SQL para actualizar el usuario
+        update_query = """
+        UPDATE users
+        SET username = %s, email = %s, password = %s
+        WHERE user_id = %s
+        """
+        execute_query(connection, update_query, (username, email, password, user_id))
 
-        # Verificar si se actualizó correctamente
-        if cursor.rowcount > 0:
-            return {
-                'statusCode': 200,
-                'body': json.dumps('User updated successfully')
-            }
-        else:
-            return {
-                'statusCode': 404,
-                'body': json.dumps('User not found')
-            }
-    except KeyError:
+        # Cerrar la conexión a la base de datos
+        connection.close()
+
         return {
-            'statusCode': 400,
-            'body': json.dumps('Bad request. Missing required parameters.')
+            'statusCode': 200,
+            'body': json.dumps({'message': 'Usuario actualizado exitosamente'})
         }
-    except mysql.connector.Error as err:
+
+    except ClientError as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Database error: {str(err)}")
+            'body': json.dumps({'message': f'Error al acceder a Secrets Manager: {str(e)}'})
+        }
+    except pymysql.MySQLError as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'message': f'Error en la base de datos: {str(e)}'})
         }
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"Error: {str(e)}")
+            'body': json.dumps({'message': f'Error inesperado: {str(e)}'})
         }
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
