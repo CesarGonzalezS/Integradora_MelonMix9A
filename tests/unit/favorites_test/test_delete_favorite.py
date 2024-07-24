@@ -1,12 +1,14 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import json
-
+import mysql.connector
+import os
 import lambdas.favorites_managment.delete_favorite.app as lambda_function  # Adjust import path as needed
 
 class TestLambdaHandler(unittest.TestCase):
 
     @patch('mysql.connector.connect')
+    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
     def test_delete_favorite_success(self, mock_connect):
         # Mock database connection and cursor
         mock_conn = MagicMock()
@@ -25,7 +27,7 @@ class TestLambdaHandler(unittest.TestCase):
         context = {}
 
         # Call the lambda_handler
-        response = lambda_function(event, context)
+        response = lambda_function.lambda_handler(event, context)
 
         # Check the result
         self.assertEqual(response['statusCode'], 200)
@@ -50,7 +52,7 @@ class TestLambdaHandler(unittest.TestCase):
         context = {}
 
         # Call the lambda_handler
-        response = lambda_handler(event, context)
+        response = lambda_function.lambda_handler(event, context)
 
         # Check the result
         self.assertEqual(response['statusCode'], 404)
@@ -62,7 +64,7 @@ class TestLambdaHandler(unittest.TestCase):
         context = {}
 
         # Call the lambda_handler
-        response = lambda_handler(event, context)
+        response = lambda_function.lambda_handler(event, context)
 
         # Check the result
         self.assertEqual(response['statusCode'], 400)
@@ -76,7 +78,7 @@ class TestLambdaHandler(unittest.TestCase):
         context = {}
 
         # Call the lambda_handler
-        response = lambda_handler(event, context)
+        response = lambda_function.lambda_handler(event, context)
 
         # Check the result
         self.assertEqual(response['statusCode'], 400)
@@ -95,7 +97,7 @@ class TestLambdaHandler(unittest.TestCase):
         context = {}
 
         # Call the lambda_handler
-        response = lambda_handler(event, context)
+        response = lambda_function.lambda_handler(event, context)
 
         # Check the result
         self.assertEqual(response['statusCode'], 500)
@@ -116,7 +118,7 @@ class TestLambdaHandler(unittest.TestCase):
         context = {}
 
         # Call the lambda_handler
-        response = lambda_handler(event, context)
+        response = lambda_function.lambda_handler(event, context)
 
         # Check the result
         self.assertEqual(response['statusCode'], 500)
