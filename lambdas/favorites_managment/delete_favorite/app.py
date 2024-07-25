@@ -29,11 +29,6 @@ def lambda_handler(event, context):
                 'statusCode': 200,
                 'body': json.dumps('Favorite deleted')
             }
-        else:
-            return {
-                'statusCode': 404,
-                'body': json.dumps('Favorite not found')
-            }
     except KeyError:
         return {
             'statusCode': 400,

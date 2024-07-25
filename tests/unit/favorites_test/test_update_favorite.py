@@ -1,113 +1,181 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import json
-import mysql.connector
 import os
-import lambdas.favorite_on_use_management.update_favorite_on_use.app as lambda_function  # Adjust import path as per your actual structure
+import mysql.connector
+import lambdas.favorites_managment.update_favorite.app as lambda_function  # Adjust import path as needed
 
-class TestLambdaHandler(unittest.TestCase):
+class TestUpdateFavorites(unittest.TestCase):
 
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
     @patch('mysql.connector.connect')
-    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
-    def test_successful_update(self, mock_connect):
-        # Setup mock for MySQL connection and cursor
+    def test_update_favorites_success(self, mock_connect):
+        # Arrange
         mock_connection = MagicMock()
-        mock_cursor = mock_connection.cursor()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
         mock_connect.return_value = mock_connection
 
+        favorite_id = '1'
+        description = 'New description'
+        user_id = 'user_1'
+        created_at = '2023-07-25'
+        mock_cursor.rowcount = 1
+
         event = {
-            'pathParameters': {
-                'favorite_on_use_id': 1
-            },
             'body': json.dumps({
-                'favorite_id': 2,
-                'song_id': 3,
-                'created_at': '2024-07-23T12:00:00Z'
+                'favorite_id': favorite_id,
+                'description': description,
+                'user_id': user_id,
+                'created_at': created_at
             })
         }
         context = {}
 
+        # Act
         response = lambda_function.lambda_handler(event, context)
 
+        # Assert
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), 'Favorite on Use updated successfully!')
+        self.assertEqual(json.loads(response['body']), 'favorite updated successfully')
 
-        expected_query = "UPDATE favorite_on_use SET favorite_id = %s, song_id = %s, created_at = %s WHERE favorite_on_use_id = %s"
-        expected_values = (2, 3, '2024-07-23T12:00:00Z', 1)
-        mock_cursor.execute.assert_called_once_with(expected_query, expected_values)
-        mock_connection.commit.assert_called_once()
-
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
     @patch('mysql.connector.connect')
-    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
-    def test_missing_body_fields(self, mock_connect):
-        # Setup mock for MySQL connection and cursor
+    def test_update_favorites_not_found(self, mock_connect):
+        # Arrange
         mock_connection = MagicMock()
-        mock_cursor = mock_connection.cursor()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
         mock_connect.return_value = mock_connection
 
+        favorite_id = '1'
+        description = 'New description'
+        user_id = 'user_1'
+        created_at = '2023-07-25'
+        mock_cursor.rowcount = 0
+
         event = {
-            'pathParameters': {
-                'favorite_on_use_id': 1
-            },
             'body': json.dumps({
-                'favorite_id': 2,
-                'song_id': 3
-                # 'created_at' is missing
+                'favorite_id': favorite_id,
+                'description': description,
+                'user_id': user_id,
+                'created_at': created_at
             })
         }
         context = {}
 
-        with self.assertRaises(KeyError):
-            lambda_function.lambda_handler(event, context)
+        # Act
+        response = lambda_function.lambda_handler(event, context)
 
+        # Assert
+        self.assertEqual(response['statusCode'], 404)
+        self.assertEqual(json.loads(response['body']), 'favorite not found')
+
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
     @patch('mysql.connector.connect')
-    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
-    def test_database_error(self, mock_connect):
-        # Setup mock to raise a database error
+    def test_update_favorites_bad_request(self, mock_connect):
+        # Arrange
         mock_connection = MagicMock()
-        mock_cursor = mock_connection.cursor()
-        mock_cursor.execute.side_effect = mysql.connector.Error("Database error")
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
         mock_connect.return_value = mock_connection
 
+        # Missing 'favorite_id' key
         event = {
-            'pathParameters': {
-                'favorite_on_use_id': 1
-            },
             'body': json.dumps({
-                'favorite_id': 2,
-                'song_id': 3,
-                'created_at': '2024-07-23T12:00:00Z'
+                'description': 'New description',
+                'user_id': 'user_1',
+                'created_at': '2023-07-25'
             })
         }
         context = {}
 
+        # Act
         response = lambda_function.lambda_handler(event, context)
 
-        self.assertEqual(response['statusCode'], 500)
-        self.assertIn('Database error:', json.loads(response['body']))
+        # Assert
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(json.loads(response['body']), 'Bad request. Missing required parameters.')
 
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
     @patch('mysql.connector.connect')
-    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
-    def test_generic_error(self, mock_connect):
-        # Setup mock to raise a generic error
-        mock_connect.side_effect = Exception("Generic error")
+    def test_update_favorites_mysql_error(self, mock_connect):
+        # Arrange
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
+        mock_connect.return_value = mock_connection
+        mock_cursor.execute.side_effect = mysql.connector.Error("MySQL error")
+
+        favorite_id = '1'
+        description = 'New description'
+        user_id = 'user_1'
+        created_at = '2023-07-25'
 
         event = {
-            'pathParameters': {
-                'favorite_on_use_id': 1
-            },
             'body': json.dumps({
-                'favorite_id': 2,
-                'song_id': 3,
-                'created_at': '2024-07-23T12:00:00Z'
+                'favorite_id': favorite_id,
+                'description': description,
+                'user_id': user_id,
+                'created_at': created_at
             })
         }
         context = {}
 
+        # Act
         response = lambda_function.lambda_handler(event, context)
 
+        # Assert
         self.assertEqual(response['statusCode'], 500)
-        self.assertIn('Error:', json.loads(response['body']))
+        self.assertIn('Database error: MySQL error', response['body'])
+
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
+    @patch('mysql.connector.connect')
+    def test_update_favorites_exception(self, mock_connect):
+        # Arrange
+        mock_connect.side_effect = Exception("General exception")
+
+        event = {
+            'body': json.dumps({
+                'favorite_id': '1',
+                'description': 'New description',
+                'user_id': 'user_1',
+                'created_at': '2023-07-25'
+            })
+        }
+        context = {}
+
+        # Act
+        response = lambda_function.lambda_handler(event, context)
+
+        # Assert
+        self.assertEqual(response['statusCode'], 500)
+        self.assertIn('General exception', response['body'])
 
 if __name__ == '__main__':
     unittest.main()

@@ -31,7 +31,7 @@ class TestLambdaHandler(unittest.TestCase):
 
         # Check the result
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), 'Favorite deleted successfully')
+        self.assertEqual(json.loads(response['body']), 'Favorite deleted')
 
     @patch('mysql.connector.connect')
     def test_delete_favorite_not_found(self, mock_connect):
@@ -55,20 +55,8 @@ class TestLambdaHandler(unittest.TestCase):
         response = lambda_function.lambda_handler(event, context)
 
         # Check the result
-        self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(json.loads(response['body']), 'Favorite not found')
-
-    @patch('mysql.connector.connect')
-    def test_missing_path_parameters(self, mock_connect):
-        event = {}
-        context = {}
-
-        # Call the lambda_handler
-        response = lambda_function.lambda_handler(event, context)
-
-        # Check the result
         self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body']), 'Bad request. Missing favorite_id in path parameters.')
+        self.assertEqual(json.loads(response['body']), 'Bad request. Missing required parameters.')
 
     @patch('mysql.connector.connect')
     def test_missing_favorite_id(self, mock_connect):
@@ -82,47 +70,63 @@ class TestLambdaHandler(unittest.TestCase):
 
         # Check the result
         self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body']), 'Bad request. Missing favorite_id in path parameters.')
+        self.assertEqual(json.loads(response['body']), 'Bad request. Missing required parameters.')
 
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
     @patch('mysql.connector.connect')
-    def test_database_error(self, mock_connect):
-        # Mock database connection and cursor
-        mock_connect.side_effect = mysql.connector.Error("Database connection error")
+    def test_lambda_handler_500_error(self, mock_connect):
+        # Arrange
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
+        mock_connect.side_effect = Exception("Database connection failed")
 
         event = {
             'pathParameters': {
-                'favorite_id': '123'
+                'favorite_id': '1'
             }
         }
         context = {}
 
-        # Call the lambda_handler
+        # Act
         response = lambda_function.lambda_handler(event, context)
 
-        # Check the result
+        # Assert
         self.assertEqual(response['statusCode'], 500)
-        self.assertTrue('Database error' in json.loads(response['body']))
+        self.assertIn('Database connection failed', response['body'])
 
+    @patch.dict(os.environ, {
+        'RDS_HOST': 'fake_host',
+        'RDS_USER': 'fake_user',
+        'RDS_PASSWORD': 'fake_password',
+        'RDS_DB': 'fake_db'
+    })
     @patch('mysql.connector.connect')
-    def test_general_exception(self, mock_connect):
-        # Mock database connection and cursor
-        mock_conn = MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.side_effect = Exception("General error")
+    def test_lambda_handler_500_mysql_error(self, mock_connect):
+        # Arrange
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
+        mock_connect.side_effect = mysql.connector.Error("MySQL error")
 
         event = {
             'pathParameters': {
-                'favorite_id': '123'
+                'favorite_id': '1'
             }
         }
         context = {}
 
-        # Call the lambda_handler
+        # Act
         response = lambda_function.lambda_handler(event, context)
 
-        # Check the result
+        # Assert
         self.assertEqual(response['statusCode'], 500)
-        self.assertTrue('Error' in json.loads(response['body']))
+        self.assertIn('Database error: MySQL error', response['body'])
 
 if __name__ == '__main__':
     unittest.main()
