@@ -18,8 +18,7 @@ def lambda_handler(event, context):
 
         cursor = connection.cursor()
 
-        data = json.loads(event['body'])
-        artist_id = data['artist_id']
+        artist_id = event['pathParameters']['artist_id']
 
         sql = "SELECT * FROM artists WHERE artist_id = %s"
         cursor.execute(sql, (artist_id,))
