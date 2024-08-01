@@ -3,10 +3,23 @@ import boto3
 from botocore.exceptions import ClientError
 
 
-def lambda_handler(event, __):
+def lambda_handler(event, context):
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
+
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers
+        }
+
     client = boto3.client('cognito-idp', region_name='us-east-2')
     user_pool_id = "us-east-2_nB20FTJg4"
     client_id = "48qsbjmtu76mrv90ndrq1hfvop"
+
     try:
         # Parsea el body del evento
         body_parameters = json.loads(event["body"])
@@ -38,21 +51,25 @@ def lambda_handler(event, __):
             )
             return {
                 'statusCode': 200,
+                'headers': headers,
                 'body': json.dumps({"message": "Password changed successfully."})
             }
         else:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({"error_message": "Unexpected challenge."})
             }
 
     except ClientError as e:
         return {
             'statusCode': 400,
+            'headers': headers,
             'body': json.dumps({"error_message": e.response['Error']['Message']})
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({"error_message": str(e)})
         }

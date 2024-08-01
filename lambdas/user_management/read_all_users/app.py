@@ -5,7 +5,6 @@ from botocore.exceptions import ClientError
 from lambdas.user_management.read_all_users.connection_bd import connect_to_db, execute_query
 from lambdas.user_management.read_all_users.get_secrets import get_secret
 
-
 def read_all_users():
     try:
         # Obtener secretos de AWS Secrets Manager
@@ -29,18 +28,31 @@ def read_all_users():
         print(f"Error connecting to MySQL: {e}")
         raise e
 
-
 def lambda_handler(event, context):
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
+
+    if event['httpMethod'] == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers
+        }
+
     try:
         # Leer usuarios
         users = read_all_users()
 
         return {
             'statusCode': 200,
+            'headers': headers,
             'body': json.dumps(users)
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'error': str(e)})
         }

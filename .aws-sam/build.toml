@@ -37,42 +37,6 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["DeleteUserFunction"]
 
-[function_build_definitions.331980b7-446a-4b49-8028-426de3fb3063]
-codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\favorites_managment\\create_favorite"
-runtime = "python3.11"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["CreateFavoriteFunction"]
-
-[function_build_definitions.35141713-ed29-4caf-83ca-6594dcb30977]
-codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\favorites_managment\\read_favorite"
-runtime = "python3.11"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["ReadFavoriteFunction"]
-
-[function_build_definitions.d262d8e1-d2b4-49c7-a8e4-768dc402fd88]
-codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\favorites_managment\\update_favorite"
-runtime = "python3.11"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["UpdateFavoriteFunction"]
-
-[function_build_definitions.58bfb9c9-d995-4830-9d6b-ad0e9e2b1d09]
-codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\favorites_managment\\delete_favorite"
-runtime = "python3.11"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["DeleteFavoriteFunction"]
-
 [function_build_definitions.306214c0-b269-4b8d-90ba-eef5b8d9d37c]
 codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\artist_management\\create_artist"
 runtime = "python3.11"
@@ -81,15 +45,6 @@ handler = "app.lambda_handler"
 manifest_hash = ""
 packagetype = "Zip"
 functions = ["CreateArtistFunction"]
-
-[function_build_definitions.2c4d5b50-08f2-48b6-8f77-aaf155523d9a]
-codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\artist_management\\read_artist"
-runtime = "python3.11"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["ReadArtistFunction"]
 
 [function_build_definitions.59da6159-cfba-4a3b-a43a-f412efb7f2e9]
 codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\artist_management\\update_artist"
@@ -108,15 +63,6 @@ handler = "app.lambda_handler"
 manifest_hash = ""
 packagetype = "Zip"
 functions = ["DeleteArtistFunction"]
-
-[function_build_definitions.766e088f-28b7-4c2a-ad8f-c27c64263404]
-codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\albums_management\\create_albums"
-runtime = "python3.11"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["CreateAlbumsFunction"]
 
 [function_build_definitions.9980c5da-7a8e-4529-b624-587e6c160ca9]
 codeuri = "C:\\Users\\cesar\\PycharmProjects\\Integradora9A\\lambdas\\albums_management\\read_albums"

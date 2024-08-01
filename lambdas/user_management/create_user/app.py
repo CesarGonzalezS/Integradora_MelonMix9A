@@ -5,6 +5,18 @@ from lambdas.user_management.create_user.get_secrets import get_secret
 from lambdas.user_management.create_user.connection_bd import connect_to_db, execute_query, close_connection
 
 def lambda_handler(event, context):
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
+
+    if event['httpMethod'] == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers
+        }
+
     try:
         body = json.loads(event['body'])
 
@@ -16,12 +28,14 @@ def lambda_handler(event, context):
         if not username or not email or not password or not date_joined:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
             }
 
         if '@' not in email:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({'message': 'Correo electrónico no válido'})
             }
 
@@ -30,6 +44,7 @@ def lambda_handler(event, context):
         except ValueError:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({'message': 'Fecha de unión no válida'})
             }
 
@@ -44,18 +59,20 @@ def lambda_handler(event, context):
 
             return {
                 'statusCode': 201,
+                'headers': headers,
                 'body': json.dumps({'message': 'Usuario creado exitosamente'})
             }
         except Exception as e:
-            # Log the exception for debugging purposes
             print(f"Unexpected error: {str(e)}")
 
             return {
                 'statusCode': 500,
+                'headers': headers,
                 'body': json.dumps({'message': 'Error interno del servidor'})
             }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': 'Error interno del servidor'})
         }

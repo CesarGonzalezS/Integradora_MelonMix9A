@@ -5,8 +5,19 @@ from botocore.exceptions import ClientError
 from lambdas.user_management.update_user.connection_bd import connect_to_db, execute_query
 from lambdas.user_management.update_user.get_secrets import get_secret
 
-
 def lambda_handler(event, context):
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET, PUT, DELETE',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
+
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers
+        }
+
     try:
         # Extraer parámetros del evento
         user_id = event.get('user_id')
@@ -18,6 +29,7 @@ def lambda_handler(event, context):
         if not user_id or not username or not email or not password:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({'message': 'Faltan parámetros requeridos'})
             }
 
@@ -45,21 +57,25 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
+            'headers': headers,
             'body': json.dumps({'message': 'Usuario actualizado exitosamente'})
         }
 
     except ClientError as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': f'Error al acceder a Secrets Manager: {str(e)}'})
         }
     except pymysql.MySQLError as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': f'Error en la base de datos: {str(e)}'})
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': f'Error inesperado: {str(e)}'})
         }
