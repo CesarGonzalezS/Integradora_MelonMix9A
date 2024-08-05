@@ -1,10 +1,10 @@
 version = 0.1
 [default.deploy.parameters]
-stack_name = "Integradora9A"
+stack_name = "MelomixEntrega2"
 region = "us-east-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
 resolve_s3 = true
-s3_prefix = "Integradora9A"
+s3_prefix = "MelomixEntrega2"
 image_repositories = []
