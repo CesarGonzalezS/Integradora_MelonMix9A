@@ -5,6 +5,12 @@ from botocore.exceptions import ClientError
 from lambdas.user_management.update_user.connection_bd import connect_to_db, execute_query
 from lambdas.user_management.update_user.get_secrets import get_secret
 
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'PUT',
+    'Access-Control-Allow-Headers': 'Content-Type'
+}
 
 def lambda_handler(event, context):
     try:
@@ -45,21 +51,25 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
+            'headers': headers,
             'body': json.dumps({'message': 'Usuario actualizado exitosamente'})
         }
 
     except ClientError as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': f'Error al acceder a Secrets Manager: {str(e)}'})
         }
     except pymysql.MySQLError as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': f'Error en la base de datos: {str(e)}'})
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': f'Error inesperado: {str(e)}'})
         }

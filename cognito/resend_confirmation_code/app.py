@@ -36,10 +36,8 @@ def lambda_handler(event, context):
 def resend_code(email, secret):
     try:
         client = boto3.client('cognito-idp')
-        secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         client.resend_confirmation_code(
             ClientId=secret['COGNITO_CLIENT_ID'],
-            SecretHash=secret_hash,
             Username=email
         )
 

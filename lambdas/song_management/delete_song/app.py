@@ -2,6 +2,13 @@ import json
 import os
 import mysql.connector
 
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type'
+}
+
 def lambda_handler(event, context):
     try:
         db_host = os.environ['RDS_HOST']
@@ -27,26 +34,31 @@ def lambda_handler(event, context):
         if cursor.rowcount > 0:
             return {
                 'statusCode': 200,
+                'headers': headers,
                 'body': json.dumps('Song deleted successfully')
             }
         else:
             return {
                 'statusCode': 404,
+                'headers': headers,
                 'body': json.dumps('Song not found')
             }
     except KeyError:
         return {
             'statusCode': 400,
+            'headers': headers,
             'body': json.dumps('Bad request. Missing required parameters.')
         }
     except mysql.connector.Error as err:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps(f"Database error: {str(err)}")
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps(f"Error: {str(e)}")
         }
     finally:

@@ -7,7 +7,7 @@ import base64
 
 
 def get_secret():
-    secret_name = "melonmix"
+    secret_name = "MelonMix_secrets"
     region_name = "us-east-2"
 
     session = boto3.session.Session()
@@ -28,7 +28,6 @@ def get_secret():
         }
 
     return json.loads(secret)
-
 
 def calculate_secret_hash(client_id, secret_key, username):
     message = username + client_id

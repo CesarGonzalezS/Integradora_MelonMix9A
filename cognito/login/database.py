@@ -7,7 +7,7 @@ import boto3
 
 
 def get_secret():
-    secret_name = "melonmix"
+    secret_name = "MelonMix_secrets"
     region_name = "us-east-2"
 
     session = boto3.session.Session()

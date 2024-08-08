@@ -42,6 +42,29 @@ Resources:
                   - rds:DescribeDBInstances
                   - rds:Connect
                 Resource: "*"
+        - PolicyName: SecretsManagerAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                Resource: "arn:aws:secretsmanager:us-east-2:992382636096:secret:MelonMix_secrets-Vzgynd"
+        - PolicyName: CognitoAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminAddUserToGroup
+                  - cognito-idp:AdminCreateUser
+                  - cognito-idp:AdminDeleteUser
+                  - cognito-idp:AdminUpdateUserAttributes
+                  - cognito-idp:AdminListGroupsForUser
+                  - cognito-idp:AdminInitiateAuth
+                  - cognito-idp:AdminRespondToAuthChallenge
+                  - cognito-idp:AdminSetUserPassword
+                Resource: "arn:aws:cognito-idp:us-east-2:992382636096:userpool/us-east-2_nB20FTJg4"
 
 
   CreateAdminFunction:
@@ -568,7 +591,7 @@ Resources:
         UpdateSong:
           Type: Api
           Properties:
-            Path: /update_song/{song_id}
+            Path: /update_song
             Method: put
       Environment:
         Variables:
@@ -862,7 +885,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_all_artist/"
   UpdateArtistApi:
     Description: "API Gateway endpoint URL for Update Artist Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_artist/{artist_id}"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_artist/"
   DeleteArtistApi:
     Description: "API Gateway endpoint URL for Delete Artist Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_artist/"
@@ -888,7 +911,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_favorite/{favorite_id}"
   UpdateFavoriteApi:
     Description: "API Gateway endpoint URL for Update Favorite Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_favorite/{favorite_id}"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_favorite/"
   DeleteFavoriteApi:
     Description: "API Gateway endpoint URL for Delete Favorite Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_favorite/{favorite_id}"
@@ -901,7 +924,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_song/{song_id}"
   UpdateSongApi:
     Description: "API Gateway endpoint URL for Prod stage for Update Song function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_song/{song_id}"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_song/"
   DeleteSongApi:
     Description: "API Gateway endpoint URL for Prod stage for Delete Song function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_song/{song_id}"
@@ -914,7 +937,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/{user_id}"
   UpdateUserApi:
     Description: "API Gateway endpoint URL for Update User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/{user_id}"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/"
   DeleteUserApi:
     Description: "API Gateway endpoint URL for Delete User Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/{user_id}"

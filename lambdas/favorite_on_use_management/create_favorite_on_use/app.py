@@ -2,6 +2,12 @@ import json
 import mysql.connector
 import os
 
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST',
+    'Access-Control-Allow-Headers': 'Content-Type'
+}
 
 def lambda_handler(event, context):
     body = json.loads(event['body'])
@@ -23,5 +29,6 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
+        'headers': headers,
         'body': json.dumps('Favorite on Use created successfully!')
     }
