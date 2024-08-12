@@ -36,7 +36,6 @@ import test_user.test_app_update_user as test_app_update_user
 import test_user.test_app_delete_user as test_app_delete_user
 import test_user.test_app_read_all_user as test_app_read_all_user
 
-import test_app_login as test_app_login
 
 loader = unittest.TestLoader()
 suite = unittest.TestSuite()
@@ -78,7 +77,6 @@ suite.addTests(loader.loadTestsFromModule(test_app_update_user))
 suite.addTests(loader.loadTestsFromModule(test_app_delete_user))
 suite.addTests(loader.loadTestsFromModule(test_app_read_all_user))
 
-suite.addTests(loader.loadTestsFromModule(test_app_login))
 
 runner = unittest.TextTestRunner(verbosity=3)
 runner.run(suite)

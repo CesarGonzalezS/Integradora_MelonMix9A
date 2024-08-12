@@ -16,9 +16,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.return_value = mock_connection
 
         event = {
-            'body': json.dumps({
-                'artist_id': 1
-            })
+            'pathParameters': {'artist_id': 1}
         }
 
         context = {}
@@ -39,9 +37,7 @@ class TestLambdaHandler(unittest.TestCase):
 
     def test_missing_parameters(self):
         event = {
-            'body': json.dumps({
-                # Missing 'artist_id'
-            })
+            'pathParameters': {}
         }
 
         context = {}
@@ -60,9 +56,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.return_value = mock_connection
 
         event = {
-            'body': json.dumps({
-                'artist_id': 1
-            })
+            'pathParameters': {'artist_id': 1}
         }
 
         context = {}
@@ -88,9 +82,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.side_effect = mysql.connector.Error("Database connection error")
 
         event = {
-            'body': json.dumps({
-                'artist_id': 1
-            })
+            'pathParameters': {'artist_id': 1}
         }
 
         context = {}
@@ -107,9 +99,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.side_effect = Exception("Generic error")
 
         event = {
-            'body': json.dumps({
-                'artist_id': 1
-            })
+            'pathParameters': {'artist_id': 1}
         }
 
         context = {}

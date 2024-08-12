@@ -2,7 +2,6 @@ import json
 import os
 import mysql.connector
 from botocore.exceptions import ClientError
-import pymysql
 import boto3
 
 headers = {
@@ -143,11 +142,11 @@ def insert_into_user(email, id_cognito, username):
     connection = get_connection()
 
     try:
-        with connection.cursor() as cursor:
+        cursor = connection.cursor()
 
-            insert_query = "INSERT INTO user (email, user_id, username) VALUES (%s, %s, %s)"
-            cursor.execute(insert_query, (email, id_cognito, username))
-            connection.commit()
+        insert_query = "INSERT INTO user (email, user_id, username) VALUES (%s, %s, %s)"
+        cursor.execute(insert_query, (email, id_cognito, username))
+        connection.commit()
 
     except Exception as e:
         return {
@@ -172,7 +171,7 @@ def get_connection():
         db_password = os.environ['RDS_PASSWORD']
         db_name = os.environ['RDS_DB']
 
-        connection = pymysql.connect(
+        connection = mysql.connector.connect(
             host=db_host,
             user=db_user,
             password=db_password,
@@ -185,4 +184,3 @@ def get_connection():
         }
 
     return connection
-
