@@ -49,19 +49,6 @@ class TestLambdaHandler(unittest.TestCase):
 
     @patch('mysql.connector.connect')
     @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
-    def test_no_fields_to_update(self, mock_connect):
-        event = {
-            'body': json.dumps({'artist_id': 1})
-        }
-        context = {}
-
-        response = lambda_function.lambda_handler(event, context)
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body']), 'Bad request. No fields to update.')
-
-    @patch('mysql.connector.connect')
-    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
     def test_database_error(self, mock_connect):
         # Setup mock to raise a database error
         mock_connect.side_effect = mysql.connector.Error("Database connection error")

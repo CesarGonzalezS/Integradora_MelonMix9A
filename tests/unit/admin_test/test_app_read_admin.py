@@ -16,7 +16,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.return_value = mock_connection
 
         event = {
-            'body': json.dumps({'admin_id': 1})
+            'pathParameters': {'admin_id': 1}
         }
         context = {}
 
@@ -46,7 +46,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.return_value = mock_connection
 
         event = {
-            'body': json.dumps({'admin_id': 1})
+            'pathParameters': {'admin_id': 1}
         }
         context = {}
 
@@ -61,7 +61,7 @@ class TestLambdaHandler(unittest.TestCase):
     @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
     def test_missing_parameters(self, mock_connect):
         event = {
-            'body': json.dumps({})
+            'pathParameters': {}
         }
         context = {}
 
@@ -77,7 +77,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.side_effect = mysql.connector.Error("Database connection error")
 
         event = {
-            'body': json.dumps({'admin_id': 1})
+            'pathParameters': {'admin_id': 1}
         }
         context = {}
 
@@ -93,7 +93,7 @@ class TestLambdaHandler(unittest.TestCase):
         mock_connect.side_effect = Exception("Generic error")
 
         event = {
-            'body': json.dumps({'admin_id': 1})
+            'pathParameters': {'admin_id': 1}
         }
         context = {}
 
