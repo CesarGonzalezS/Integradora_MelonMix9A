@@ -5,16 +5,22 @@ import base64
 import pymysql
 import json
 import boto3
+import os
 
 
 def get_connection():
     secrets = get_secret()
     try:
+        db_host = os.environ['RDS_HOST']
+        db_user = os.environ['RDS_USER']
+        db_password = os.environ['RDS_PASSWORD']
+        db_name = os.environ['RDS_DB']
+
         connection = pymysql.connect(
-            host=secrets['HOST'],
-            user=secrets['USERNAME'],
-            password=secrets['PASSWORD'],
-            database=secrets['DB_NAME']
+            host=db_host,
+            user=db_user,
+            password=db_password,
+            database=db_name
         )
     except Exception as e:
         return {
@@ -26,8 +32,8 @@ def get_connection():
 
 
 def get_secret():
-    secret_name = "COAUTO"
-    region_name = "us-east-1"
+    secret_name = "MelonMix_secrets"
+    region_name = "us-east-2"
 
     session = boto3.session.Session()
     client = session.client(

@@ -5,7 +5,12 @@ from botocore.exceptions import ClientError
 from lambdas.user_management.read_all_users.connection_bd import connect_to_db, execute_query
 from lambdas.user_management.read_all_users.get_secrets import get_secret
 
-
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type'
+}
 def read_all_users():
     try:
         # Obtener secretos de AWS Secrets Manager
@@ -37,10 +42,12 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
+            'headers': headers,
             'body': json.dumps(users)
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'error': str(e)})
         }
