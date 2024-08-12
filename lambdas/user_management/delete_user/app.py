@@ -4,6 +4,12 @@ from pymysql import Error as MySQLError
 from lambdas.user_management.delete_user.get_secrets import get_secret
 from lambdas.user_management.delete_user.connection_bd import connect_to_db, execute_query, close_connection
 
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type'
+}
 
 def lambda_handler(event, context):
     try:
@@ -13,6 +19,7 @@ def lambda_handler(event, context):
         if not user_id:
             return {
                 'statusCode': 400,
+                'headers': headers,
                 'body': json.dumps({'message': 'Faltan parámetros obligatorios'})
             }
 
@@ -28,32 +35,38 @@ def lambda_handler(event, context):
                 if connection.cursor.rowcount > 0:
                     return {
                         'statusCode': 200,
+                        'headers': headers,
                         'body': json.dumps({'message': 'Usuario eliminado exitosamente'})
                     }
                 else:
                     return {
                         'statusCode': 404,
+                        'headers': headers,
                         'body': json.dumps({'message': 'Usuario no encontrado'})
                     }
             else:
                 return {
                     'statusCode': 500,
+                    'headers': headers,
                     'body': json.dumps({'message': 'Error interno del servidor'})
                 }
 
         except MySQLError as e:
             return {
                 'statusCode': 500,
+                'headers': headers,
                 'body': json.dumps({'message': 'Error de base de datos: ' + str(e)})
             }
         except Exception as e:
             return {
                 'statusCode': 500,
+                'headers': headers,
                 'body': json.dumps({'message': 'Error interno del servidor: ' + str(e)})
             }
 
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers,
             'body': json.dumps({'message': 'Error interno del servidor: ' + str(e)})
         }

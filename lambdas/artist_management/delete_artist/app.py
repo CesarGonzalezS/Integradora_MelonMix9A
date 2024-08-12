@@ -2,6 +2,13 @@ import json
 import os
 import mysql.connector
 
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type'
+}
+
 def lambda_handler(event, context):
     try:
         db_host = os.environ['RDS_HOST']
@@ -18,8 +25,7 @@ def lambda_handler(event, context):
 
         cursor = connection.cursor()
 
-        data = json.loads(event['body'])
-        artist_id = data['artist_id']
+        artist_id = event['pathParameters']['artist_id']
 
         sql = "DELETE FROM artists WHERE artist_id = %s"
         cursor.execute(sql, (artist_id,))

@@ -18,12 +18,12 @@ def lambda_handler(event, context):
             'body': 'Invalid request body.'
         }
 
-    email = body.get('email')
+    username = body.get('username')
     confirmation_code = body.get('confirmation_code')
 
     try:
         secret = get_secret()
-        response = confirmation_registration(email, confirmation_code, secret)
+        response = confirmation_registration(username, confirmation_code, secret)
         return response
     except Exception as e:
         return {
@@ -33,15 +33,13 @@ def lambda_handler(event, context):
         }
 
 
-def confirmation_registration(email, confirmation_code, secret):
+def confirmation_registration(username, confirmation_code, secret):
     try:
         client = boto3.client('cognito-idp')
-        secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         client.confirm_sign_up(
             ClientId=secret['COGNITO_CLIENT_ID'],
-            Username=email,
+            Username=username,
             ConfirmationCode=confirmation_code,
-            SecretHash=secret_hash,
         )
 
     except Exception as e:
