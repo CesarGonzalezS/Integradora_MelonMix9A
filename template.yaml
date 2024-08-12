@@ -473,6 +473,28 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
+  GetAllFavoritesByUserFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/favorites_managment/get_all_favorites_by_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetAllFavorites:
+          Type: Api
+          Properties:
+            Path: /get_all_favorites_by_user/{user_id}
+            Method: get
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
   ReadFavoriteFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -913,6 +935,9 @@ Outputs:
   CreateFavoriteApi:
     Description: "API Gateway endpoint URL for Create Favorite Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_favorite/"
+  GetAllFavoritesByUserApi:
+    Description: "API Gateway endpoint URL for Get All Favorites By User Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_all_favorites_by_user/{user_id}"
   ReadFavoriteApi:
     Description: "API Gateway endpoint URL for Read Favorite Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_favorite/{favorite_id}"
