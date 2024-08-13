@@ -3,7 +3,6 @@ import boto3
 import pymysql
 from botocore.exceptions import ClientError
 from lambdas.user_management.read_user.connection_bd import connect_to_db, execute_query
-from lambdas.user_management.read_user.get_secrets import get_secret
 
 headers = {
     'Content-Type': 'application/json',
@@ -14,11 +13,9 @@ headers = {
 
 def read_users(username=None):
     try:
-        # Obtener secretos de AWS Secrets Manager
-        secrets = get_secret()
 
         # Conectarse a la base de datos
-        connection = connect_to_db(secrets)
+        connection = connect_to_db()
 
         # Construir la consulta
         if username:
@@ -35,11 +32,7 @@ def read_users(username=None):
         connection.close()
 
         return users
-    except ClientError as e:
-        print(f"Error obtaining secret: {e}")
-        raise e
-    except pymysql.MySQLError as e:
-        print(f"Error connecting to MySQL: {e}")
+    except Exception as e:
         raise e
 
 

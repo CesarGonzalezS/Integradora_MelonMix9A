@@ -1,20 +1,24 @@
-import pymysql
+import mysql.connector
 import os
 import logging
-from lambdas.user_management.read_user.get_secrets import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
 
 def connect_to_db():
     try:
-        secrets = get_secret(os.getenv('SECRET_NAME'), os.getenv('REGION_NAME'))
-        connection = pymysql.connect(
-            host=secrets['host'],
-            user=secrets['username'],
-            password=secrets['password'],
-            database=os.getenv('RDS_DB')
+        db_host = os.environ['RDS_HOST']
+        db_user = os.environ['RDS_USER']
+        db_password = os.environ['RDS_PASSWORD']
+        db_name = os.environ['RDS_DB']
+
+        connection = mysql.connector.connect(
+            host=db_host,
+            user=db_user,
+            password=db_password,
+            database=db_name
         )
+
         logging.info("Connection established successfully.")
         return connection
     except Exception as e:

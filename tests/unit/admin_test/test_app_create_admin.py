@@ -4,7 +4,7 @@ import json
 import os
 
 # Adjust the import path as needed
-from lambdas.admin_management.create_admin.app import lambda_handler
+from lambdas.admin_management.create_admin.app import lambda_handler, get_secret
 
 class TestAdminCreate(unittest.TestCase):
 
@@ -114,6 +114,86 @@ class TestAdminCreate(unittest.TestCase):
         # Assertions
         self.assertEqual(response['statusCode'], 400)
         self.assertIn('Name exceeds 50 characters', response['body'])
+
+    @patch('lambdas.admin_management.create_admin.app.get_secret')
+    @patch('mysql.connector.connect')
+    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
+    @patch('lambdas.admin_management.create_admin.app.boto3.client')
+    def test_lambda_handler_missing_username_or_password(self, mock_boto3_client, mock_mysql_connect, mock_get_secret):
+        # Mock environment variables
+        os.environ['RDS_HOST'] = 'mock_host'
+        os.environ['RDS_USER'] = 'mock_user'
+        os.environ['RDS_PASSWORD'] = 'mock_password'
+        os.environ['RDS_DB'] = 'mock_db'
+
+        # Mock the input event with missing username
+        event = {
+            'body': json.dumps({
+                'username': '',
+                'email': '',
+                'password': ''
+            })
+        }
+
+        # Invoke the lambda_handler
+        response = lambda_handler(event, None)
+
+        # Assertions
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('Missing parameters', response['body'])
+
+    @patch('lambdas.admin_management.create_admin.app.get_secret')
+    @patch('mysql.connector.connect')
+    @patch.dict(os.environ, {'RDS_HOST': 'test_host', 'RDS_USER': 'test_user', 'RDS_PASSWORD': 'test_password', 'RDS_DB': 'test_db'})
+    @patch('lambdas.admin_management.create_admin.app.boto3.client')
+    def test_lambda_handler_generic_exception(self, mock_boto3_client, mock_mysql_connect, mock_get_secret):
+        # Mock environment variables
+        os.environ['RDS_HOST'] = 'mock_host'
+        os.environ['RDS_USER'] = 'mock_user'
+        os.environ['RDS_PASSWORD'] = 'mock_password'
+        os.environ['RDS_DB'] = 'mock_db'
+
+        # Mock the input event
+        event = {
+            'body': json.dumps({
+                'username': 'test_user',
+                'email': 'test@example.com',
+                'password': 'TestPassword123!'
+            })
+        }
+
+        # Mock MySQL connection and cursor
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connection.cursor.return_value = mock_cursor
+        mock_mysql_connect.return_value = mock_connection
+
+        # Mock cursor methods if necessary
+        mock_cursor.execute.side_effect = Exception('Mock exception')
+
+        # Invoke the lambda_handler
+        response = lambda_handler(event, None)
+
+        # Assertions
+        self.assertEqual(response['statusCode'], 500)
+        self.assertIn('Error: Mock exception', response['body'])
+
+    @patch('lambdas.admin_management.create_admin.app.boto3.client')
+    def test_get_secret(self, mock_boto3_client):
+        # Mock boto3 client behavior
+        mock_secrets_client = MagicMock()
+        mock_secrets_client.get_secret_value.return_value = {
+            'SecretString': '{"COGNITO_CLIENT_ID": "mock_client_id", "COGNITO_USER_POOL_ID": "mock_user_pool_id"}'
+        }
+        mock_boto3_client.return_value = mock_secrets_client
+
+        # Invoke the get_secret function
+        secret = get_secret()
+
+        # Assertions
+        self.assertEqual(secret['COGNITO_CLIENT_ID'], '48qsbjmtu76mrv90ndrq1hfvop')
+        self.assertEqual(secret['COGNITO_USER_POOL_ID'], 'us-east-2_nB20FTJg4')
+
 
 if __name__ == '__main__':
     unittest.main()
