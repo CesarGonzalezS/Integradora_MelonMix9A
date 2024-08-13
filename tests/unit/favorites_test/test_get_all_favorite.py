@@ -21,7 +21,7 @@ class TestFavoritesLambdaHandler(unittest.TestCase):
 
         # Mocking database response
         mock_cursor.fetchall.return_value = [
-            (1, 'Favorite description', 'user123', '2024-02-02', 10, 'Song Title', '3:45', 1, 1, 'Rock')
+            (1, 'Favorite description', 'user123', 10, 'Song Title', '3:45', 1, 1, 'Rock')
         ]
 
         event = {
@@ -35,7 +35,6 @@ class TestFavoritesLambdaHandler(unittest.TestCase):
             'favorite_id': 1,
             'description': 'Favorite description',
             'user_id': 'user123',
-            'created_at': '2024-02-02',
             'song': {
                 'song_id': 10,
                 'title': 'Song Title',

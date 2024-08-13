@@ -31,7 +31,7 @@ def lambda_handler(event, context):
         user_id = event['pathParameters']['user_id']
 
         sql = """
-        SELECT f.favorite_id, f.description, f.user_id, f.created_at, 
+        SELECT f.favorite_id, f.description, f.user_id, 
                s.song_id, s.title, s.duration, s.album_id, s.artist_id, s.genre
         FROM favorites f
         JOIN songs s ON f.favorite_id = s.song_id
@@ -47,14 +47,13 @@ def lambda_handler(event, context):
                     'favorite_id': favorite[0],
                     'description': favorite[1],
                     'user_id': favorite[2],
-                    'created_at': favorite[3],
                     'song': {
-                        'song_id': favorite[4],
-                        'title': favorite[5],
-                        'duration': favorite[6],
-                        'album_id': favorite[7],
-                        'artist_id': favorite[8],
-                        'genre': favorite[9]
+                        'song_id': favorite[3],
+                        'title': favorite[4],
+                        'duration': favorite[5],
+                        'album_id': favorite[6],
+                        'artist_id': favorite[7],
+                        'genre': favorite[8]
                     }
                 }
                 favorites_list.append(favorite_dict)
