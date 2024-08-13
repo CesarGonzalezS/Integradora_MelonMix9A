@@ -124,7 +124,7 @@ def insert_into_user(email, id_cognito, username):
     connection = get_connection()
     cursor = connection.cursor()
 
-    insert_query = "INSERT INTO user (email, user_id, username) VALUES (%s, %s, %s)"
+    insert_query = "INSERT INTO users (email, user_id, username) VALUES (%s, %s, %s)"
     cursor.execute(insert_query, (email, id_cognito, username))
     connection.commit()
 

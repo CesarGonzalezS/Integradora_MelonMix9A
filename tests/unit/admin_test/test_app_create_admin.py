@@ -58,7 +58,7 @@ class TestAdminCreate(unittest.TestCase):
 
         # Assert that the user was inserted into the database
         mock_cursor.execute.assert_called_once_with(
-            "INSERT INTO user (email, user_id, username) VALUES (%s, %s, %s)",
+            "INSERT INTO users (email, user_id, username) VALUES (%s, %s, %s)",
             ('test@example.com', 'mock_user_sub', 'test_user')
         )
 
