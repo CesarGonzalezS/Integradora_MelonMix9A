@@ -16,16 +16,10 @@ def get_secret():
         region_name=region_name
     )
 
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-        secret = get_secret_value_response['SecretString']
-    except ClientError as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+    get_secret_value_response = client.get_secret_value(
+        SecretId=secret_name
+    )
+    secret = get_secret_value_response['SecretString']
 
     return json.loads(secret)
 

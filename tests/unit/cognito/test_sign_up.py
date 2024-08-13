@@ -2,6 +2,7 @@ import json
 import unittest
 from unittest.mock import patch, MagicMock
 from lambdas.cognito.sign_up.app import lambda_handler, register_user, insert_into_user
+from lambdas.cognito.sign_up.database import get_secret
 
 class TestSignUpLambdaHandler(unittest.TestCase):
 
@@ -121,6 +122,23 @@ class TestSignUpLambdaHandler(unittest.TestCase):
 
         self.assertEqual(response['statusCode'], 500)
         self.assertIn('An error occurred', json.loads(response['body'])['message'])
+
+    @patch('lambdas.cognito.sign_up.database.boto3.client')
+    def test_get_secret(self, mock_boto3_client):
+        # Mock boto3 client behavior
+        mock_secrets_client = MagicMock()
+        mock_secrets_client.get_secret_value.return_value = {
+            'SecretString': '{"COGNITO_CLIENT_ID": "mock_client_id", "COGNITO_USER_POOL_ID": "mock_user_pool_id"}'
+        }
+        mock_boto3_client.return_value = mock_secrets_client
+
+        # Invoke the get_secret function
+        secret = get_secret()
+
+        # Assertions
+        self.assertEqual(secret['COGNITO_CLIENT_ID'], '48qsbjmtu76mrv90ndrq1hfvop')
+        self.assertEqual(secret['COGNITO_USER_POOL_ID'], 'us-east-2_nB20FTJg4')
+
 
 
 if __name__ == '__main__':

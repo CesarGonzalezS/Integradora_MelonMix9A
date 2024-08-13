@@ -5,6 +5,8 @@ from botocore.exceptions import ClientError
 from lambdas.cognito.login.app import lambda_handler, parse_request_body, validate_credentials, authenticate_user, \
     get_user_group, build_response
 
+from lambdas.cognito.login.database import get_secret
+
 
 class TestLambdaHandler(unittest.TestCase):
 
@@ -118,6 +120,22 @@ class TestLambdaHandler(unittest.TestCase):
         self.assertEqual(response['statusCode'], 500)
         self.assertIn('error_message', json.loads(response['body']))
         self.assertEqual(json.loads(response['body'])['error_message'], 'Unhandled exception')
+
+    @patch('lambdas.cognito.login.database.boto3.client')
+    def test_get_secret(self, mock_boto3_client):
+        # Mock boto3 client behavior
+        mock_secrets_client = MagicMock()
+        mock_secrets_client.get_secret_value.return_value = {
+            'SecretString': '{"COGNITO_CLIENT_ID": "mock_client_id", "COGNITO_USER_POOL_ID": "mock_user_pool_id"}'
+        }
+        mock_boto3_client.return_value = mock_secrets_client
+
+        # Invoke the get_secret function
+        secret = get_secret()
+
+        # Assertions
+        self.assertEqual(secret['COGNITO_CLIENT_ID'], '48qsbjmtu76mrv90ndrq1hfvop')
+        self.assertEqual(secret['COGNITO_USER_POOL_ID'], 'us-east-2_nB20FTJg4')
 
 
 if __name__ == '__main__':
