@@ -1,7 +1,7 @@
 import json
 import boto3
 from botocore.exceptions import ClientError
-from database import get_secret
+from lambdas.cognito.login.database import get_secret
 
 # Define headers for CORS
 headers = {

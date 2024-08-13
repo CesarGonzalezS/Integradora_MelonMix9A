@@ -235,15 +235,6 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["DeleteSongFunction"]
 
-[function_build_definitions.eb52698c-d555-407e-a402-a9587fdd5477]
-codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\user_management\\create_user"
-runtime = "python3.12"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["CreateUserFunction"]
-
 [function_build_definitions.d506eec7-f0b7-4124-847b-85c3a5891f73]
 codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\user_management\\read_user"
 runtime = "python3.12"
@@ -252,33 +243,6 @@ handler = "app.lambda_handler"
 manifest_hash = ""
 packagetype = "Zip"
 functions = ["ReadUserFunction"]
-
-[function_build_definitions.c345a306-4467-47a4-a1f0-681d8d51713d]
-codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\user_management\\update_user"
-runtime = "python3.12"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["UpdateUserFunction"]
-
-[function_build_definitions.7ff5ad06-07e4-44d5-8b95-8be5bce4f0d0]
-codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\user_management\\delete_user"
-runtime = "python3.12"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["DeleteUserFunction"]
-
-[function_build_definitions.4e8e02bf-e8f4-4b43-95a0-614474b3e713]
-codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\cognito\\login"
-runtime = "python3.12"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["LoginFunction"]
 
 [function_build_definitions.2ee22502-58b4-44b3-a4c9-e3ad18e05fd3]
 codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\cognito\\change_password"
@@ -289,15 +253,6 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["ChangePasswordFunction"]
 
-[function_build_definitions.094d88ae-5067-44dc-8b5f-b7a1194e929d]
-codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\cognito\\sign_up"
-runtime = "python3.12"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["SignUpFunction"]
-
 [function_build_definitions.0a1067ea-20c3-4ad7-a56d-74fb1d0d3096]
 codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\cognito\\confirm_forgot_password"
 runtime = "python3.12"
@@ -307,15 +262,6 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["ConfirmForgotPasswordFunction"]
 
-[function_build_definitions.44a0c1b6-1e02-4bb8-967a-806a5dc51c6a]
-codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\cognito\\confirm_sign_up"
-runtime = "python3.12"
-architecture = "x86_64"
-handler = "app.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["ConfirmSignUpFunction"]
-
 [function_build_definitions.73b7348e-946f-4a95-8c92-bc2efc94fa7d]
 codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\cognito\\forgot_password"
 runtime = "python3.12"
@@ -324,5 +270,32 @@ handler = "app.lambda_handler"
 manifest_hash = ""
 packagetype = "Zip"
 functions = ["ForgotPasswordFunction"]
+
+[function_build_definitions.427607f2-7992-46ba-8925-f95035cc0977]
+codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\cognito\\login"
+runtime = "python3.12"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["LoginFunction"]
+
+[function_build_definitions.c6b3f7ab-978d-48f5-bc19-332f78f210e5]
+codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\cognito\\sign_up"
+runtime = "python3.12"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["SignUpFunction"]
+
+[function_build_definitions.c23f1c2e-d8a0-4345-87d8-1174a8fdae08]
+codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\cognito\\confirm_sign_up"
+runtime = "python3.12"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["ConfirmSignUpFunction"]
 
 [layer_build_definitions]

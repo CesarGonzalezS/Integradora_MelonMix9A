@@ -31,11 +31,10 @@ import favorites_test.test_update_favorite as test_update_favorite
 import favorites_test.test_delete_favorite as test_delete_favorite
 
 import test_user.test_app_read_user as test_app_read_user
-import test_user.test_app_create_user as test_app_create_user
-import test_user.test_app_update_user as test_app_update_user
-import test_user.test_app_delete_user as test_app_delete_user
-import test_user.test_app_read_all_user as test_app_read_all_user
 
+import tests.unit.cognito.test_login as test_login
+import tests.unit.cognito.test_sign_up as test_sign_up
+import tests.unit.cognito.test_confirm_sign_up as test_confirm_sign_up
 
 loader = unittest.TestLoader()
 suite = unittest.TestSuite()
@@ -72,10 +71,10 @@ suite.addTests(loader.loadTestsFromModule(test_update_favorite))
 suite.addTests(loader.loadTestsFromModule(test_delete_favorite))
 
 suite.addTests(loader.loadTestsFromModule(test_app_read_user))
-suite.addTests(loader.loadTestsFromModule(test_app_create_user))
-suite.addTests(loader.loadTestsFromModule(test_app_update_user))
-suite.addTests(loader.loadTestsFromModule(test_app_delete_user))
-suite.addTests(loader.loadTestsFromModule(test_app_read_all_user))
+
+suite.addTests(loader.loadTestsFromModule(test_login))
+suite.addTests(loader.loadTestsFromModule(test_sign_up))
+suite.addTests(loader.loadTestsFromModule(test_confirm_sign_up))
 
 
 runner = unittest.TextTestRunner(verbosity=3)
