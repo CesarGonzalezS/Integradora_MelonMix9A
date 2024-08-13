@@ -121,22 +121,17 @@ class TestLambdaHandler(unittest.TestCase):
         self.assertIn('error_message', json.loads(response['body']))
         self.assertEqual(json.loads(response['body'])['error_message'], 'Unhandled exception')
 
-    @patch('lambdas.cognito.login.database.boto3.client')
+    @patch('lambdas.cognito.login.database.boto3.session.Session.client')
     def test_get_secret(self, mock_boto3_client):
-        # Mock boto3 client behavior
-        mock_secrets_client = MagicMock()
-        mock_secrets_client.get_secret_value.return_value = {
-            'SecretString': '{"COGNITO_CLIENT_ID": "mock_client_id", "COGNITO_USER_POOL_ID": "mock_user_pool_id"}'
+        secret_value = {"key": "value"}
+
+        mock_client_instance = MagicMock()
+        mock_client_instance.get_secret_value.return_value = {
+            'SecretString': json.dumps(secret_value)
         }
-        mock_boto3_client.return_value = mock_secrets_client
+        mock_boto3_client.return_value = mock_client_instance
 
-        # Invoke the get_secret function
-        secret = get_secret()
-
-        # Assertions
-        self.assertEqual(secret['COGNITO_CLIENT_ID'], '48qsbjmtu76mrv90ndrq1hfvop')
-        self.assertEqual(secret['COGNITO_USER_POOL_ID'], 'us-east-2_nB20FTJg4')
-
-
+        result = get_secret()
+        self.assertEqual(result, secret_value)
 if __name__ == '__main__':
     unittest.main()
