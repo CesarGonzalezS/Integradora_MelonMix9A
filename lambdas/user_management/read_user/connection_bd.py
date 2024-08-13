@@ -1,7 +1,7 @@
 import pymysql
 import os
 import logging
-from lambdas.user_management.read_all_users.get_secrets import get_secret
+from lambdas.user_management.read_user.get_secrets import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

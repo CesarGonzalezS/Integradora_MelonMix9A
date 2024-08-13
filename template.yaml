@@ -651,28 +651,6 @@ Resources:
           RDS_DB: "melonmix"
 
 
-  CreateUserFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/user_management/create_user/
-      Handler: app.lambda_handler
-      Runtime: python3.12
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        RegisterUser:
-          Type: Api
-          Properties:
-            Path: /create_user
-            Method: post
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
   ReadUserFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -695,55 +673,11 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
-  UpdateUserFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/user_management/update_user/
-      Handler: app.lambda_handler
-      Runtime: python3.12
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        UpdateUser:
-          Type: Api
-          Properties:
-            Path: /update_user
-            Method: put
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
-  DeleteUserFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      CodeUri: lambdas/user_management/delete_user/
-      Handler: app.lambda_handler
-      Runtime: python3.12
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        DeleteUser:
-          Type: Api
-          Properties:
-            Path: /delete_user/{user_id}
-            Method: delete
-      Environment:
-        Variables:
-          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
-          RDS_USER: "admin"
-          RDS_PASSWORD: "admin123"
-          RDS_DB: "melonmix"
-
 
   LoginFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: cognito/login/
+      CodeUri: lambdas/cognito/login/
       Handler: app.lambda_handler
       Runtime: python3.12
       Timeout: 60
@@ -788,7 +722,7 @@ Resources:
   SignUpFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: cognito/sign_up/
+      CodeUri: lambdas/cognito/sign_up/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -832,7 +766,7 @@ Resources:
   ConfirmSignUpFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      CodeUri: cognito/confirm_sign_up/
+      CodeUri: lambdas/cognito/confirm_sign_up/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -961,18 +895,9 @@ Outputs:
     Description: "API Gateway endpoint URL for Prod stage for Delete Song function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_song/{song_id}"
 
-  CreateUserApi:
-    Description: "API Gateway endpoint URL for Create User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_user/"
   ReadUserApi:
     Description: "API Gateway endpoint URL for Read User Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_user/{user_id}"
-  UpdateUserApi:
-    Description: "API Gateway endpoint URL for Update User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_user/"
-  DeleteUserApi:
-    Description: "API Gateway endpoint URL for Delete User Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_user/{user_id}"
 
   LoginApi:
     Description: "API Gateway endpoint URL for Login Function"

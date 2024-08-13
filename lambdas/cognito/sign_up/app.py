@@ -1,6 +1,6 @@
 import json
 import boto3
-from database import get_secret, get_connection
+from lambdas.cognito.sign_up.database import get_secret, get_connection
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
