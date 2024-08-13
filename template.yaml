@@ -206,6 +206,28 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
+  ReadAllAlbumsFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/albums_management/read_all_albums/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        ReadAlbums:
+          Type: Api
+          Properties:
+            Path: /read_all_albums
+            Method: get
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
   UpdateAlbumsFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -606,6 +628,28 @@ Resources:
           RDS_PASSWORD: "admin123"
           RDS_DB: "melonmix"
 
+  ReadAllSongsFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/song_management/read_all_songs/  # Se ha actualizado la ruta de CodeUri
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetSong:
+          Type: Api
+          Properties:
+            Path: /read_all_songs
+            Method: get
+      Environment:
+        Variables:
+          RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
+          RDS_USER: "admin"
+          RDS_PASSWORD: "admin123"
+          RDS_DB: "melonmix"
+
   UpdateSongFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -830,6 +874,9 @@ Outputs:
   ReadAlbumsApi:
     Description: "API Gateway endpoint URL for Read Albums Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_albums/"
+  ReadAllAlbumsApi:
+    Description: "API Gateway endpoint URL for Read All Albums Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_all_albums/"
   UpdateAlbumsApi:
     Description: "API Gateway endpoint URL for Update Albums Function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_albums/"
@@ -888,6 +935,9 @@ Outputs:
   GetSongApi:
     Description: "API Gateway endpoint URL for Prod stage for Get Song function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_song/{song_id}"
+  GetAllSongsApi:
+    Description: "API Gateway endpoint URL for Prod stage for Get All Songs function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read_all_songs/"
   UpdateSongApi:
     Description: "API Gateway endpoint URL for Prod stage for Update Song function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_song/"

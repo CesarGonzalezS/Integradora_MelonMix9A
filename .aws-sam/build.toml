@@ -298,4 +298,22 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["ConfirmSignUpFunction"]
 
+[function_build_definitions.d4b77b95-a054-4901-b1aa-7d2d3791ef2e]
+codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\albums_management\\read_all_albums"
+runtime = "python3.12"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["ReadAllAlbumsFunction"]
+
+[function_build_definitions.7d6613db-ea0d-43e3-83b8-e74f37fd37a7]
+codeuri = "C:\\Users\\prac.des6\\Documents\\GitHub\\Integradora_MelonMix9A\\lambdas\\song_management\\read_all_songs"
+runtime = "python3.12"
+architecture = "x86_64"
+handler = "app.lambda_handler"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["ReadAllSongsFunction"]
+
 [layer_build_definitions]

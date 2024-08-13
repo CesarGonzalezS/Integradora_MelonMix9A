@@ -1,7 +1,6 @@
 import json
 import os
 import mysql.connector
-from datetime import date
 
 headers = {
     'Content-Type': 'application/json',
