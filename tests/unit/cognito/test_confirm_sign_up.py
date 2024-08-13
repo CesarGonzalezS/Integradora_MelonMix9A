@@ -1,7 +1,7 @@
 import json
 import unittest
 from unittest.mock import patch, MagicMock
-from lambdas.cognito.confirm_sign_up.database import calculate_secret_hash, get_secret
+from lambdas.cognito.confirm_sign_up.database import get_secret
 
 from lambdas.cognito.confirm_sign_up.app import lambda_handler, confirmation_registration
 
@@ -98,6 +98,21 @@ class TestLambdaHandler(unittest.TestCase):
             Username='test_user',
             ConfirmationCode='123456',
         )
+
+    @patch('lambdas.cognito.confirm_sign_up.database.boto3.session.Session.client')
+    def test_get_secret(self, mock_boto3_client):
+        # Mock boto3 client behavior
+        secret_value = {"key": "value"}
+
+        mock_client_instance = MagicMock()
+        mock_client_instance.get_secret_value.return_value = {
+            'SecretString': json.dumps(secret_value)
+        }
+        mock_boto3_client.return_value = mock_client_instance
+
+        result = get_secret()
+        self.assertEqual(result, secret_value)
+
 
 if __name__ == '__main__':
     unittest.main()
