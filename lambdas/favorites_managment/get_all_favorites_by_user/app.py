@@ -47,7 +47,7 @@ def lambda_handler(event, context):
                     'favorite_id': favorite[0],
                     'description': favorite[1],
                     'user_id': favorite[2],
-                    'created_at': favorite[3].strftime('%Y-%m-%d'),
+                    'created_at': favorite[3],
                     'song': {
                         'song_id': favorite[4],
                         'title': favorite[5],

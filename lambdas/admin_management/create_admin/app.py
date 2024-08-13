@@ -46,27 +46,14 @@ def lambda_handler(event, context):
                 'body': json.dumps({'message': 'Missing parameters.'})
             }
 
-        try:
-            secret = get_secret()
-            response = register_admin(email, password, username, secret)
-            return response
-        except Exception as e:
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({'message': f'An error occurred: {str(e)}'})
-            }
+        secret = get_secret()
+        response = register_admin(email, password, username, secret)
+        return response
     except KeyError:
         return {
             'statusCode': 400,
             'headers': headers,
             'body': json.dumps('Bad request. Missing required parameters.')
-        }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps(f"Database error: {str(err)}")
         }
     except Exception as e:
         return {
@@ -90,16 +77,11 @@ def get_secret():
         region_name=region_name
     )
 
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-        secret = get_secret_value_response['SecretString']
-    except ClientError as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+    get_secret_value_response = client.get_secret_value(
+        SecretId=secret_name
+    )
+    secret = get_secret_value_response['SecretString']
+
 
     return json.loads(secret)
 
@@ -140,23 +122,13 @@ def register_admin(email, password, username, secret):
 
 def insert_into_user(email, id_cognito, username):
     connection = get_connection()
+    cursor = connection.cursor()
 
-    try:
-        cursor = connection.cursor()
+    insert_query = "INSERT INTO user (email, user_id, username) VALUES (%s, %s, %s)"
+    cursor.execute(insert_query, (email, id_cognito, username))
+    connection.commit()
 
-        insert_query = "INSERT INTO user (email, user_id, username) VALUES (%s, %s, %s)"
-        cursor.execute(insert_query, (email, id_cognito, username))
-        connection.commit()
-
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps({'message': f'An error occurred: {str(e)}'})
-        }
-
-    finally:
-        connection.close()
+    connection.close()
 
     return {
         'statusCode': 200,
@@ -165,22 +137,16 @@ def insert_into_user(email, id_cognito, username):
     }
 
 def get_connection():
-    try:
-        db_host = os.environ['RDS_HOST']
-        db_user = os.environ['RDS_USER']
-        db_password = os.environ['RDS_PASSWORD']
-        db_name = os.environ['RDS_DB']
+    db_host = os.environ['RDS_HOST']
+    db_user = os.environ['RDS_USER']
+    db_password = os.environ['RDS_PASSWORD']
+    db_name = os.environ['RDS_DB']
 
-        connection = mysql.connector.connect(
-            host=db_host,
-            user=db_user,
-            password=db_password,
-            database=db_name
-        )
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': f'Failed to connect to database: {str(e)}'
-        }
+    connection = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
+    )
 
     return connection

@@ -27,6 +27,7 @@ import favorite_on_use_managment_test.test_delete_favorite_on_use as test_delete
 
 import favorites_test.test_create_favorite as test_create_favorite
 import favorites_test.test_read_favorite as test_read_favorite
+import favorites_test.test_get_all_favorite as test_get_all_favorite
 import favorites_test.test_update_favorite as test_update_favorite
 import favorites_test.test_delete_favorite as test_delete_favorite
 
@@ -67,6 +68,7 @@ suite.addTests(loader.loadTestsFromModule(test_delete_favorite_on_use))
 
 suite.addTests(loader.loadTestsFromModule(test_create_favorite))
 suite.addTests(loader.loadTestsFromModule(test_read_favorite))
+suite.addTests(loader.loadTestsFromModule(test_get_all_favorite))
 suite.addTests(loader.loadTestsFromModule(test_update_favorite))
 suite.addTests(loader.loadTestsFromModule(test_delete_favorite))
 
