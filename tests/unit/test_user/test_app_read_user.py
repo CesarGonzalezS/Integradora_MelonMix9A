@@ -171,6 +171,7 @@ class TestLambdaHandler(unittest.TestCase):
 
         mock_connection.close.assert_called_once()
 
+
     @patch('lambdas.user_management.read_user.connection_bd.mysql.connector.connect')
     def test_close_connection_failure(self, mock_connect):
         mock_connection = MagicMock()
