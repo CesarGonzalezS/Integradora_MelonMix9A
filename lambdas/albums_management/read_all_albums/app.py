@@ -5,16 +5,18 @@ import mysql.connector
 headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'PUT',
+    'Access-Control-Allow-Methods': 'GET',
     'Access-Control-Allow-Headers': 'Content-Type'
 }
 
+
 def lambda_handler(event, context):
     try:
-        db_host = os.environ['RDS_HOST']
+
         db_user = os.environ['RDS_USER']
         db_password = os.environ['RDS_PASSWORD']
         db_name = os.environ['RDS_DB']
+        db_host = os.environ['RDS_HOST']
 
         connection = mysql.connector.connect(
             host=db_host,
@@ -25,32 +27,25 @@ def lambda_handler(event, context):
 
         cursor = connection.cursor()
 
-        data = json.loads(event['body'])
-        artist_id = data['artist_id']
-        name = data.get('name')
-        genre = data.get('genre')
-        bio = data.get('bio')
+        sql = "SELECT * FROM albums"
+        cursor.execute(sql)
+        albums = cursor.fetchall()
 
-        sql = "UPDATE artists SET name = %s, genre = %s, bio = %s WHERE artist_id = %s"
-        cursor.execute(sql, (name, genre, bio, artist_id))
-        connection.commit()
+        albums_list = []
+
+        for album in albums:
+            album_dict = {
+                'album_id': album[0],
+                'title': album[1],
+                'release_date': album[2].strftime('%Y-%m-%d'),
+                'artist_id': album[3]
+            }
+            albums_list.append(album_dict)
 
         return {
             'statusCode': 200,
             'headers': headers,
-            'body': json.dumps('Artist updated successfully')
-        }
-    except KeyError:
-        return {
-            'statusCode': 400,
-            'headers': headers,
-            'body': json.dumps('Bad request. Missing required parameters.')
-        }
-    except mysql.connector.Error as err:
-        return {
-            'statusCode': 500,
-            'headers': headers,
-            'body': json.dumps(f"Database error: {str(err)}")
+            'body': json.dumps(albums_list)
         }
     except Exception as e:
         return {
