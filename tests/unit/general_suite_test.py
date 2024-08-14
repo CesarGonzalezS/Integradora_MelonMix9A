@@ -20,11 +20,6 @@ import artist_test.test_update_artist_app as test_update_artist_app
 import artist_test.test_delete_artist_app as test_delete_artist_app
 import artist_test.test_read_all_artist_app as test_read_all_artist_app
 
-import favorite_on_use_managment_test.test_create_favorite_on_use as test_create_favorite_on_use
-import favorite_on_use_managment_test.test_read_favorite_on_use as test_read_favorite_on_use
-import favorite_on_use_managment_test.test_update_favorite_on_use as test_update_favorite_on_use
-import favorite_on_use_managment_test.test_delete_favorite_on_use as test_delete_favorite_on_use
-
 import favorites_test.test_create_favorite as test_create_favorite
 import favorites_test.test_read_favorite as test_read_favorite
 import favorites_test.test_get_all_favorite as test_get_all_favorite
@@ -60,11 +55,6 @@ suite.addTests(loader.loadTestsFromModule(test_read_artist_app))
 suite.addTests(loader.loadTestsFromModule(test_update_artist_app))
 suite.addTests(loader.loadTestsFromModule(test_delete_artist_app))
 suite.addTests(loader.loadTestsFromModule(test_read_all_artist_app))
-
-suite.addTests(loader.loadTestsFromModule(test_create_favorite_on_use))
-suite.addTests(loader.loadTestsFromModule(test_read_favorite_on_use))
-suite.addTests(loader.loadTestsFromModule(test_update_favorite_on_use))
-suite.addTests(loader.loadTestsFromModule(test_delete_favorite_on_use))
 
 suite.addTests(loader.loadTestsFromModule(test_create_favorite))
 suite.addTests(loader.loadTestsFromModule(test_read_favorite))
