@@ -17,6 +17,17 @@ Globals:
 
 Resources:
 
+  MySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: MelonMix_secrets
+      Description: "Secrets for Integradora9A application"
+      SecretString: !Sub |
+        {
+          "COGNITO_USER_POOL_ID": "${CognitoUserPool}",
+          "COGNITO_CLIENT_ID": "${CognitoUserPoolClient}",
+          "COGNITO_GROUP_NAME": "usuario"
+        }
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -54,7 +65,7 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - secretsmanager:GetSecretValue
-                Resource: 'arn:aws:secretsmanager:us-east-1:*'
+                Resource: 'arn:aws:secretsmanager:us-east-2:*:secret:MelonMix_secrets-*'
         - PolicyName: S3AccessPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -96,7 +107,7 @@ Resources:
                   - cognito-idp:AdminSetUserSettings
                   - cognito-idp:AdminUpdateAuthEventFeedback
                   - cognito-idp:AdminUserGlobalSignOut
-                Resource: 'arn:aws:cognito-idp:us-east-1:*:*'
+                Resource: 'arn:aws:cognito-idp:us-east-2:*:*'
 
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
@@ -118,6 +129,21 @@ Resources:
           RequireNumbers: True
           RequireSymbols: True
 
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: CognitoUserPoolClient
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: False
+      ExplicitAuthFlows:
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_CUSTOM_AUTH
+        - ALLOW_USER_SRP_AUTH
+
+
   AdminUserGroup:
       Type: AWS::Cognito::UserPoolGroup
       Properties:
@@ -137,15 +163,7 @@ Resources:
     Properties:
       BucketName: !Sub "integradora9a-${AWS::Region}-${AWS::AccountId}"
 
-  MySecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: Integradora9ASecrets
-      Description: "Secrets for Integradora9A application"
-      SecretString: !Sub |
-        {
-          "UserPoolId": "${CognitoUserPool}"
-        }
+
   AdminsApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -163,7 +181,7 @@ Resources:
   AdminsAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
-      Name: AdminsAuthorizer
+      Name: AdminsAuthorizerSet
       IdentitySource: method.request.header.Authorization
       RestApiId: !Ref AdminsApi
       Type: COGNITO_USER_POOLS
@@ -188,7 +206,7 @@ Resources:
   AlbumsAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
-      Name: AlbumsAuthorizer
+      Name: AlbumsAuthorizerSet
       IdentitySource: method.request.header.Authorization
       RestApiId: !Ref AlbumsApi
       Type: COGNITO_USER_POOLS
@@ -213,7 +231,7 @@ Resources:
   ArtistAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
-      Name: ArtistAuthorizer
+      Name: ArtistAuthorizerSet
       IdentitySource: method.request.header.Authorization
       RestApiId: !Ref ArtistApi
       Type: COGNITO_USER_POOLS
@@ -248,7 +266,7 @@ Resources:
   UserAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
-      Name: UserAuthorizer
+      Name: UserAuthorizerSet
       IdentitySource: method.request.header.Authorization
       RestApiId: !Ref UserApi
       Type: COGNITO_USER_POOLS
