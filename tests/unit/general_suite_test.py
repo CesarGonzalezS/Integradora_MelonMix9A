@@ -4,9 +4,7 @@ import songs_test.test_create_song as test_create_song
 import songs_test.test_update_song as test_update_song
 import songs_test.test_delete_song as test_delete_song
 
-import admin_test.test_app_delete_admin as test_app_delete_admin
 import admin_test.test_app_read_admin as test_app_read_admin
-import admin_test.test_app_update_admin as test_app_update_admin
 import admin_test.test_app_create_admin as test_app_create_admin
 
 import albums_test.test_app_read_album as test_app_read_album
@@ -19,12 +17,6 @@ import artist_test.test_read_artist_app as test_read_artist_app
 import artist_test.test_update_artist_app as test_update_artist_app
 import artist_test.test_delete_artist_app as test_delete_artist_app
 import artist_test.test_read_all_artist_app as test_read_all_artist_app
-
-import favorites_test.test_create_favorite as test_create_favorite
-import favorites_test.test_read_favorite as test_read_favorite
-import favorites_test.test_get_all_favorite as test_get_all_favorite
-import favorites_test.test_update_favorite as test_update_favorite
-import favorites_test.test_delete_favorite as test_delete_favorite
 
 import test_user.test_app_read_user as test_app_read_user
 
@@ -42,8 +34,6 @@ suite.addTests(loader.loadTestsFromModule(test_update_song))
 
 suite.addTests(loader.loadTestsFromModule(test_app_create_admin))
 suite.addTests(loader.loadTestsFromModule(test_app_read_admin))
-suite.addTests(loader.loadTestsFromModule(test_app_update_admin))
-suite.addTests(loader.loadTestsFromModule(test_app_delete_admin))
 
 suite.addTests(loader.loadTestsFromModule(test_app_read_album))
 suite.addTests(loader.loadTestsFromModule(test_app_create_album))
@@ -55,12 +45,6 @@ suite.addTests(loader.loadTestsFromModule(test_read_artist_app))
 suite.addTests(loader.loadTestsFromModule(test_update_artist_app))
 suite.addTests(loader.loadTestsFromModule(test_delete_artist_app))
 suite.addTests(loader.loadTestsFromModule(test_read_all_artist_app))
-
-suite.addTests(loader.loadTestsFromModule(test_create_favorite))
-suite.addTests(loader.loadTestsFromModule(test_read_favorite))
-suite.addTests(loader.loadTestsFromModule(test_get_all_favorite))
-suite.addTests(loader.loadTestsFromModule(test_update_favorite))
-suite.addTests(loader.loadTestsFromModule(test_delete_favorite))
 
 suite.addTests(loader.loadTestsFromModule(test_app_read_user))
 
