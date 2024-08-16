@@ -31,7 +31,7 @@ def get_connection():
 
 
 def get_secret():
-    secret_name = "MelonMix_secrets"
+    secret_name = "MelonMix_secret"
     region_name = "us-east-2"
 
     session = boto3.session.Session()
