@@ -20,7 +20,7 @@ Resources:
   MySecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: MelonMix_secrets
+      Name: MelonMix_secret
       Description: "Secrets for Integradora9A application"
       SecretString: !Sub |
         {
@@ -65,7 +65,7 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - secretsmanager:GetSecretValue
-                Resource: 'arn:aws:secretsmanager:us-east-2:*:secret:MelonMix_secrets-*'
+                Resource: 'arn:aws:secretsmanager:us-east-2:*:secret:MelonMix_secret-*'
         - PolicyName: S3AccessPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -175,7 +175,7 @@ Resources:
       EngineVersion: '5.7'
       MasterUsername: admin
       MasterUserPassword: admin123
-      DBInstanceIdentifier: integradoramelomix
+      DBInstanceIdentifier: integradoramelonmix
       PubliclyAccessible: true
 
   RDSSecurityGroup:
@@ -323,7 +323,6 @@ Resources:
       ProviderARNs:
           - !GetAtt CognitoUserPool.Arn
 
-  #songsApi, does not have authorizer
   SongsApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -333,6 +332,20 @@ Resources:
         AllowOrigin: "'*'"
         AllowHeaders: "'*'"
         AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
+      Auth:
+         Authorizers:
+            SongsAuthorizer:
+              UserPoolArn: !GetAtt CognitoUserPool.Arn
+
+  SongsAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: SongsAuthorizerSet
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref SongsApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+          - !GetAtt CognitoUserPool.Arn
 
   UserApi:
     Type: AWS::Serverless::Api
@@ -386,8 +399,6 @@ Resources:
             RestApiId: !Ref AdminsApi
             Path: /create_admin
             Method: post
-            Auth:
-              Authorizer: AdminsAuthorizer
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
@@ -450,8 +461,6 @@ Resources:
             RestApiId: !Ref AlbumsApi
             Path: /read_albums/{album_id}
             Method: get
-            Auth:
-              Authorizer: AlbumsAuthorizer
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
@@ -482,8 +491,6 @@ Resources:
             RestApiId: !Ref AlbumsApi
             Path: /read_all_albums
             Method: get
-            Auth:
-              Authorizer: AlbumsAuthorizer
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
@@ -734,6 +741,8 @@ Resources:
             RestApiId: !Ref SongsApi
             Path: /create_song
             Method: post
+            Auth:
+              Authorizer: SongsAuthorizer
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
@@ -822,6 +831,8 @@ Resources:
             RestApiId: !Ref SongsApi
             Path: /update_song
             Method: put
+            Auth:
+              Authorizer: SongsAuthorizer
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
@@ -852,6 +863,8 @@ Resources:
             RestApiId: !Ref SongsApi
             Path: /delete_song/{song_id}
             Method: delete
+            Auth:
+                Authorizer: SongsAuthorizer
       Environment:
         Variables:
           RDS_HOST: "integradoramelomix.c92quiiw2jmr.us-east-2.rds.amazonaws.com"
