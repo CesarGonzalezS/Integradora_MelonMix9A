@@ -75,6 +75,8 @@ Resources:
                   - s3:PutObject
                   - s3:GetObject
                   - s3:DeleteObject
+                  - s3:ListBucket
+                  - s3:CreateBucket
                 Resource: !Sub "arn:aws:s3:::integradora9a-${AWS::Region}-${AWS::AccountId}/*"
               - Effect: Allow
                 Action:
@@ -163,6 +165,89 @@ Resources:
     Properties:
       BucketName: !Sub "integradora9a-${AWS::Region}-${AWS::AccountId}"
 
+  RDSDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '20'
+      BackupRetentionPeriod: 0
+      DBInstanceClass: db.t3.micro  # Updated instance class
+      Engine: mysql
+      EngineVersion: '5.7'
+      MasterUsername: admin
+      MasterUserPassword: admin123
+      DBInstanceIdentifier: integradoramelomix
+      PubliclyAccessible: true
+
+  RDSSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: RDS Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: '0.0.0.0/0'
+
+  Dashboard:
+      Type: "AWS::CloudWatch::Dashboard"
+      Properties:
+          DashboardName: "MelonMixDashboard"
+          DashboardBody: !Sub |
+              {
+                  "widgets": [
+                      {
+                          "type": "metric",
+                          "x": 0,
+                          "y": 0,
+                          "width": 24,
+                          "height": 6,
+                          "properties": {
+                              "metrics": [
+                                  [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "integradoramelomix", { "stat": "Average" } ]
+                              ],
+                              "view": "timeSeries",
+                              "stacked": false,
+                              "region": "${AWS::Region}",
+                              "title": "CPU Utilization",
+                              "period": 300
+                          }
+                      },
+                      {
+                          "type": "metric",
+                          "x": 0,
+                          "y": 6,
+                          "width": 24,
+                          "height": 6,
+                          "properties": {
+                              "metrics": [
+                                  [ "AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", "integradoramelomix", { "stat": "Average" } ]
+                              ],
+                              "view": "timeSeries",
+                              "stacked": false,
+                              "region": "${AWS::Region}",
+                              "title": "Free Storage Space",
+                              "period": 300
+                          }
+                      },
+                      {
+                          "type": "metric",
+                          "x": 0,
+                          "y": 12,
+                          "width": 24,
+                          "height": 6,
+                          "properties": {
+                              "metrics": [
+                                  [ "AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "integradoramelomix", { "stat": "Average" } ]
+                              ],
+                              "view": "timeSeries",
+                              "stacked": false,
+                              "region": "${AWS::Region}",
+                              "title": "Database Connections",
+                              "period": 300
+                          }
+                      }
+                  ]
+              }
 
   AdminsApi:
     Type: AWS::Serverless::Api
